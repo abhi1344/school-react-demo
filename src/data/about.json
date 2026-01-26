@@ -1,0 +1,31 @@
+{
+  "page_metadata": {
+    "title": "About Our School"
+  },
+  "sections": {
+    "intro": {
+      "headline": "About Our School",
+      "description": "We are committed to nurturing academic excellence, character, and confidence in every student through modern education practices."
+    },
+    "mission": {
+      "title": "Our Mission",
+      "content": "To provide a safe, inclusive, and innovative learning environment that empowers students to succeed academically and personally.",
+      "image": "/images/gemini-about.jpg"
+    },
+    "vision": {
+      "title": "Our Vision",
+      "content": "To become a leading educational institution that shapes responsible global citizens.",
+      "image": "/images/gemini-holistic.jpg"
+    },
+    "values": {
+      "title": "Our Core Values",
+      "items": [
+        "Academic Excellence",
+        "Integrity and Discipline",
+        "Innovation and Creativity",
+        "Student Safety and Well-being"
+      ],
+      "image": "/images/gemini-teachers.jpg"
+    }
+  }
+}

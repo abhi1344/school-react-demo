@@ -1,0 +1,205 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fa;
+  margin: 0;
+  padding: 0; /* ⬅️ IMPORTANT */
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.btn-primary {
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+h1, h2, h3 {
+  color: #1f2937;
+}
+
+
+h1 {
+  border-bottom: 2px solid #2563eb;
+  padding-bottom: 5px;
+}
+
+p {
+  line-height: 1.6;
+  max-width: 700px;
+}
+strong {
+  color: #2563eb;
+}
+/* ========== HOME PAGE ========== */
+* ---------- TYPOGRAPHY ---------- */
+/* ===== HOME PAGE SCOPE ===== */
+.home-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 64px 24px;
+}
+
+/* Section spacing */
+.home-page section {
+  margin-bottom: 96px;
+}
+
+/* ===== HERO ===== */
+.home-hero {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+
+.home-hero-text {
+  flex: 1;
+}
+
+.home-hero-image {
+  flex: 1;
+}
+
+.home-hero-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+}
+
+/* Typography */
+.home-page h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.home-page h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.home-page p {
+  max-width: 700px;
+  line-height: 1.7;
+}
+
+/* ===== ABOUT ===== */
+.home-about {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* ===== HIGHLIGHTS ===== */
+.home-highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.home-card-soft {
+  padding: 24px;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* ---------- ABOUT SECTION ---------- */
+
+.home-about {
+  text-align: center;
+}
+
+/* ---------- HIGHLIGHTS SECTION ---------- */
+
+.home-highlights ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+
+/* ===== NAVBAR (PREMIUM) ===== */
+/* ===== NAVBAR ===== */
+/* ===== NAVBAR ===== */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 76px;
+  padding: 0 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* LOGO */
+.navbar-logo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* LINKS */
+.navbar-links {
+  display: flex;
+  gap: 40px;
+}
+
+/* 🔑 RESET BUTTON COMPLETELY */
+.navbar-links button {
+  all: unset;                 /* THIS FIXES DISAPPEARING */
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #475569;
+
+  position: relative;
+}
+
+/* HOVER UNDERLINE */
+.navbar-links button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0;
+  height: 2px;
+  background: #2563eb;
+  transition: width 0.25s ease;
+}
+
+.navbar-links button:hover {
+  color: #0f172a;
+}
+
+.navbar-links button:hover::after {
+  width: 100%;
+}

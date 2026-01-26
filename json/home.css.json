@@ -1,0 +1,31 @@
+{
+    "page": "home",
+    "global": {
+      "content_width": "centered",
+      "max_width": "1100px",
+      "section_gap": "large"
+    },
+    "sections": {
+      "hero": {
+        "layout": "two_column",
+        "text_alignment": "left",
+        "image_alignment": "right",
+        "vertical_spacing": "large"
+      },
+      "about": {
+        "layout": "single_column",
+        "text_alignment": "center",
+        "vertical_spacing": "medium"
+      },
+      "highlights": {
+        "layout": "single_column",
+        "list_style": "clean",
+        "vertical_spacing": "medium"
+      }
+    },
+    "typography": {
+      "heading_weight": "bold",
+      "paragraph_width": "readable"
+    }
+  }
+  

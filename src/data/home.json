@@ -1,0 +1,184 @@
+{
+  "page_metadata": {
+    "title": "Modern School Home",
+    "viewport_strategy": "mobile-first"
+  },
+  "design_system": {
+    "colors": {
+      "primary": "#FF7F50",
+      "dark": "#1E1E1E",
+      "light": "#FFFFFF",
+      "muted": "#6B7280"
+    },
+    "spacing": {
+      "s": "8px",
+      "m": "16px",
+      "l": "32px",
+      "xl": "64px"
+    }
+  },
+  "sections": {
+    "hero": {
+      "type": "carousel",
+      "overlay_style": "semi-transparent_dark",
+      "slides": [
+        {
+          "headline": "Shaping Future Leaders",
+          "subtext": "A modern learning environment focused on excellence and values.",
+          "background_image": {
+            "responsive": {
+              "desktop": "/images/gemini-hero-desktop.jpg",
+              "mobile": "/images/gemini-hero-mobile.jpg"
+            },
+            "fallback": "/images/gemini-hero-desktop.jpg",
+            "accent_colors": ["#004AAD", "#FFFFFF"]
+          }
+        },
+        {
+          "headline": "Learning Beyond Classrooms",
+          "subtext": "Innovation, creativity, and confidence for every student.",
+          "background_image": {
+            "responsive": {
+              "desktop": "/images/gemini-hero-2-desktop.jpg",
+              "mobile": "/images/gemini-hero-2-mobile.jpg"
+            },
+            "fallback": "/images/gemini-hero-2-desktop.jpg"
+          }
+        }
+      ],
+      "desktop_layout": {
+        "height": "85vh",
+        "content_alignment": "center_left"
+      },
+      "tablet_layout": {
+        "height": "70vh",
+        "content_alignment": "center"
+      },
+      "mobile_layout": {
+        "height": "60vh",
+        "content_alignment": "center"
+      }
+    },
+    "about_school": {
+      "content": "Our school blends academic excellence with character building, preparing students for a rapidly evolving world. We encourage creativity, innovation, and critical thinking in every student.",
+      "highlights": [
+        "Modern classrooms with interactive learning tools",
+        "Focus on arts, sports, and technology",
+        "Personalized mentoring for every student"
+      ],
+      "supporting_visual": {
+        "placeholder": "/images/gemini-about.jpg",
+        "description": "Teacher mentoring students in a modern classroom"
+      },
+      "desktop_layout": {
+        "image_position": "right",
+        "padding": "64px",
+        "background_color": "#F3F4F6",
+        "text_alignment": "left"
+      },
+      "tablet_layout": {
+        "image_position": "top",
+        "padding": "48px",
+        "background_color": "#F3F4F6",
+        "text_alignment": "center"
+      },
+      "mobile_layout": {
+        "image_position": "top",
+        "padding": "32px",
+        "background_color": "#F3F4F6",
+        "text_alignment": "center"
+      }
+    },
+    "highlights": {
+      "spacing": "l",
+      "background": {
+        "image": "/images/gemini-highlights-bg.jpg",
+        "overlay": "rgba(255,255,255,0.55)"
+      },
+      "section_intro": {
+        "eyebrow": "Why Choose Us",
+        "headline": "A School Built for the Future",
+        "description": "We provide a balanced learning environment that focuses on academics, safety, and holistic growth.",
+        "cta": {
+          "label": "Explore Our Programs",
+          "action": "navigate_to_about"
+        },
+        "text_style": {
+          "eyebrow_fontSize": "0.95rem",
+          "eyebrow_color": "#6B7280",
+          "headline_fontSize": "clamp(2.6rem, 5vw, 3.4rem)",
+          "headline_color": "#111827",
+          "description_fontSize": "1.15rem",
+          "description_color": "#374151"
+        }
+      },
+      "items": [
+        {
+          "title": "Qualified Faculty",
+          "description": "Experienced educators committed to academic excellence and student mentorship.",
+          "visual": {
+            "placeholder": "/images/gemini-teachers.jpg",
+            "description": "Professional teachers interacting with students"
+          }
+        },
+        {
+          "title": "Modern Facilities",
+          "description": "Smart classrooms, labs, and infrastructure designed for modern education.",
+          "visual": {
+            "placeholder": "/images/gemini-lab.jpg",
+            "description": "Science lab with modern equipment"
+          }
+        },
+        {
+          "title": "Student Safety",
+          "description": "Secure campus with supervised environments and safety-first policies.",
+          "visual": {
+            "placeholder": "/images/gemini-safety.jpg",
+            "description": "Safe and secure school campus"
+          }
+        },
+        {
+          "title": "Holistic Development",
+          "description": "Equal focus on academics, sports, arts, and life skills.",
+          "visual": {
+            "placeholder": "/images/gemini-holistic.jpg",
+            "description": "Students engaged in sports and co-curricular activities"
+          }
+        }
+      ],
+      "desktop_layout": { "columns": 3, "padding": "48px 64px" },
+      "tablet_layout": { "columns": 2, "padding": "32px 48px" },
+      "mobile_layout": { "columns": 1, "padding": "24px 24px" }
+    },  
+    "cta": {
+      "headline": "Admissions Open for 2026",
+      "subtext": "Join a school that nurtures curiosity, confidence, and competence.",
+      "background_style": "blurred_glass_morphism",
+      "background_image": {
+        "placeholder": "/images/gemini-cta-bg.jpg",
+        "description": "Calm and inspiring school campus background for call to action"
+      },
+      "buttons": [
+        {
+          "label": "Apply Now",
+          "type": "primary",
+          "action": "navigate_to_admissions"
+        },
+        {
+          "label": "Contact Us",
+          "type": "secondary",
+          "action": "navigate_to_contact"
+        }
+      ],
+      "desktop_layout": {
+        "padding": "64px"
+      },
+      "tablet_layout": {
+        "padding": "48px"
+      },
+      "mobile_layout": {
+        "padding": "32px"
+      }
+    }
+  }
+}

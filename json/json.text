@@ -1,0 +1,61 @@
+{
+  "project": {
+    "name": "School Website",
+    "phase": "foundation",
+    "frontend": "React (Create React App)",
+    "backend": "Supabase",
+    "server": "none"
+  },
+  "src_structure": {
+    "files": [
+      "App.js",
+      "App.css",
+      "App.test.js",
+      "index.js",
+      "index.css",
+      "setupTests.js",
+      "reportWebVitals.js",
+      "logo.svg",
+      "supabaseClient.js",
+      "HomePage.js",
+      "AboutPage.js",
+      "ContactPage.js",
+      "NoticePage.js"
+    ]
+  },
+  "pages": {
+    "public": [
+      "HomePage",
+      "AboutPage",
+      "ContactPage",
+      "NoticePage"
+    ]
+  },
+  "navigation": {
+    "type": "state_based",
+    "location": "App.js",
+    "router": false,
+    "state": {
+      "name": "page",
+      "default": "home",
+      "allowed_values": ["home", "notice", "about", "contact", "panels"]
+
+    }
+  },
+  "styling": {
+    "global_css": "index.css",
+    "component_css": ["App.css"],
+    "frameworks": "none"
+  },
+  "backend_integration": {
+    "client_file": "supabaseClient.js",
+    "usage": "used by NoticePage or NoticeModule",
+    "auth": false
+  },
+  "constraints": {
+    "no_router": true,
+    "single_global_css": true,
+    "json_first_planning": true,
+    "no_admin_phase_yet": true
+  }
+}

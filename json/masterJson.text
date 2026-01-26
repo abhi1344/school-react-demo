@@ -1,0 +1,148 @@
+do u remember Project: School Website (UI Exploration Phase)
+
+Stack:
+- React (create-react-app)
+- Supabase backend
+- No React Router yet
+- Single global index.css
+- JSON-first workflow (authoritative)
+
+Current Status:
+- Home page exists but looks text-heavy
+- Architecture is correct but visually boring
+- Goal now is to DESIGN a visually rich Home page
+- We want carousel, strong hero imagery, cards, breakpoints
+
+New Approach:
+- Design-first using free AI (Gemini)
+- AI must output DESIGN AS JSON (not code)
+- JSON will then be normalized, locked, and coded,,,,,,,,,,,,,,,,,,, and GLOBAL SYSTEM META
+{
+  "system": {
+    "name": "School Website & Management System",
+    "roles": ["ADMIN", "TEACHER", "STUDENT", "STAFF", "PARENT"],
+    "phases": ["PHASE-1", "PHASE-2", "PHASE-3"],
+    "rule": "JSON defines structure, code implements behavior"
+  }
+}
+________________________________________
+PHASE‑1 (ACTIVE)
+UI MAP (Frontend Reference)
+{
+  "PHASE-1": {
+    "ui": {
+      "AdminDashboard": ["SummaryCards", "ClassManager", "UserManager", "NoticePublisher"],
+      "TeacherDashboard": ["MyClasses", "AttendanceForm", "StudentList"],
+      "StudentDashboard": ["AttendanceSummary", "Notices"],
+      "StaffDashboard": ["Notices"]
+    }
+  }
+}
+________________________________________
+DATA MODEL (Backend + Frontend Shared)
+{
+  "PHASE-1": {
+    "models": {
+      "User": {"id": "string", "name": "string", "role": "string"},
+      "Class": {"classId": "string", "name": "string", "section": "string"},
+      "Student": {"studentId": "string", "classId": "string", "rollNo": "number"},
+      "Attendance": {"date": "YYYY-MM-DD", "studentId": "string", "status": "PRESENT|ABSENT"},
+      "Notice": {"title": "string", "message": "string", "targetRoles": "array"}
+    }
+  }
+}
+________________________________________
+SERVICE MAP (Backend Reference)
+{
+  "PHASE-1": {
+    "services": {
+      "AuthService": ["/login"],
+      "AttendanceService": ["/attendance/save", "/attendance/view"],
+      "NoticeService": ["/notice/create", "/notice/list"],
+      "UserService": ["/user/create", "/user/list"]
+    }
+  }
+}
+________________________________________
+PHASE‑2 (PLANNED – DISABLED)
+UI MAP
+{
+  "PHASE-2": {
+    "ui": {
+      "AdminDashboard": ["FeeManager", "ReportGenerator"],
+      "TeacherDashboard": ["MarksEntry", "HomeworkUpload"],
+      "StudentDashboard": ["ResultsView", "HomeworkView"],
+      "StaffDashboard": ["AttendanceView"]
+    }
+  }
+}
+________________________________________
+DATA MODEL
+{
+  "PHASE-2": {
+    "models": {
+      "Exam": {"examId": "string", "name": "string", "classId": "string"},
+      "Marks": {"studentId": "string", "subject": "string", "score": "number"},
+      "Fee": {"studentId": "string", "amount": "number", "status": "PAID|DUE"},
+      "Homework": {"classId": "string", "description": "string", "dueDate": "date"}
+    }
+  }
+}
+________________________________________
+SERVICE MAP
+{
+  "PHASE-2": {
+    "services": {
+      "ExamService": ["/exam/create", "/exam/list"],
+      "MarksService": ["/marks/save", "/marks/view"],
+      "FeeService": ["/fee/create", "/fee/status"],
+      "HomeworkService": ["/homework/upload", "/homework/list"]
+    }
+  }
+}
+________________________________________
+PHASE‑3 (FUTURE)
+UI MAP
+{
+  "PHASE-3": {
+    "ui": {
+      "ParentDashboard": ["StudentOverview", "FeePayment", "Notifications"],
+      "AdminDashboard": ["TransportManager", "LibraryManager"],
+      "MobileApp": ["AllDashboards"]
+    }
+  }
+}
+________________________________________
+DATA MODEL
+{
+  "PHASE-3": {
+    "models": {
+      "Parent": {"parentId": "string", "linkedStudentId": "string"},
+      "Payment": {"paymentId": "string", "amount": "number", "mode": "ONLINE"},
+      "Transport": {"routeId": "string", "vehicleNo": "string"},
+      "Library": {"bookId": "string", "status": "ISSUED|AVAILABLE"}
+    }
+  }
+}
+________________________________________
+SERVICE MAP
+{
+  "PHASE-3": {
+    "services": {
+      "PaymentService": ["/payment/initiate", "/payment/status"],
+      "ParentService": ["/parent/link"],
+      "TransportService": ["/transport/track"],
+      "LibraryService": ["/library/issue"]
+    }
+  }
+}
+________________________________________
+GOVERNANCE RULES (LOCKED)
+{
+  "rules": {
+    "phase-1-only-active": true,
+    "no-ui-for-phase-2-3": true,
+    "json-first-development": true,
+    "any-new-feature-must-map-to-json": true
+  }
+}

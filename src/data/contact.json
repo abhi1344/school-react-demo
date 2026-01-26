@@ -1,0 +1,25 @@
+{
+  "page_metadata": {
+    "title": "Contact Us"
+  },
+  "sections": {
+    "intro": {
+      "headline": "Contact Us",
+      "description": "We would love to hear from you. Reach out for admissions, queries, or campus visits."
+    },
+    "details": {
+      "address": "Modern School Campus, City Name, State",
+      "phone": "+91-9876543210",
+      "email": "info@schoolname.com",
+      "image": "/images/gemini-safety.jpg"
+    },
+    "office_hours": {
+      "title": "Office Hours",
+      "hours": [
+        "Monday – Friday: 9:00 AM – 4:00 PM",
+        "Saturday: 9:00 AM – 1:00 PM",
+        "Sunday: Closed"
+      ]
+    }
+  }
+}
