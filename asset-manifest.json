@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/school-react-demo/static/css/main.afae14bd.css",
+    "main.js": "/school-react-demo/static/js/main.1b5e6142.js",
+    "index.html": "/school-react-demo/index.html",
+    "main.afae14bd.css.map": "/school-react-demo/static/css/main.afae14bd.css.map",
+    "main.1b5e6142.js.map": "/school-react-demo/static/js/main.1b5e6142.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.afae14bd.css",
+    "static/js/main.1b5e6142.js"
+  ]
+}
