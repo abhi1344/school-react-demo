@@ -1,0 +1,28 @@
+{
+  "panels": [
+    {
+      "title": "Admin Dashboard",
+      "content": "Manage users, notices, classes",
+      "icon": "/icons/admin.svg",
+      "action": "navigate_admin"
+    },
+    {
+      "title": "Teacher Dashboard",
+      "content": "View classes, attendance, students",
+      "icon": "/icons/teacher.svg",
+      "action": "navigate_teacher"
+    },
+    {
+      "title": "Student Dashboard",
+      "content": "Check attendance, notices, assignments",
+      "icon": "/icons/student.svg",
+      "action": "navigate_student"
+    },
+    {
+      "title": "Staff Dashboard",
+      "content": "View and post notices",
+      "icon": "/icons/staff.svg",
+      "action": "navigate_staff"
+    }
+  ]
+}

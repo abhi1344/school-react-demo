@@ -1,7 +1,23 @@
-import React from "react";
-import contactJson from "./data/contact.json";
+import React, { useEffect, useState } from "react";
 
 function ContactPage() {
+  const [contactJson, setContactJson] = useState(null);
+
+  useEffect(() => {
+    // Load JSON from /public/json/contact.json
+    fetch("/json/contact.json")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load contact.json");
+        return res.json();
+      })
+      .then((data) => setContactJson(data))
+      .catch((err) => console.error(err));
+  }, []);
+
+  if (!contactJson) {
+    return <div className="page contact-page">Loading...</div>;
+  }
+
   const { sections } = contactJson;
 
   return (
@@ -10,7 +26,8 @@ function ContactPage() {
       <p>{sections.intro.description}</p>
 
       <section>
-        <img src={sections.details.image} alt="Campus" />
+        {/* Image path must be from public/images */}
+        <img src={`/images/${sections.details.image}`} alt="Campus" />
         <p><strong>Address:</strong> {sections.details.address}</p>
         <p><strong>Phone:</strong> {sections.details.phone}</p>
         <p><strong>Email:</strong> {sections.details.email}</p>

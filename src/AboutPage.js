@@ -1,10 +1,24 @@
-import React from "react";
-import aboutJson from "./data/about.json";
+
+import React, { useEffect, useState } from "react";
 
 function AboutPage() {
-  const { sections } = aboutJson;
+  const [aboutJson, setAboutJson] = useState(null);
 
-  return (
+  useEffect(() => {
+    fetch("/json/about.json")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load about.json");
+        return res.json();
+      })
+      .then((data) => setAboutJson(data))
+      .catch((err) => console.error(err));
+  }, []);
+
+  if (!aboutJson) {
+    return <div className="page about-page">Loading...</div>;
+  }
+
+  const { sections } = aboutJson;return (
     <div className="page about-page">
       <h1>{sections.intro.headline}</h1>
       <p>{sections.intro.description}</p>

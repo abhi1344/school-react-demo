@@ -1,10 +1,25 @@
-import React from "react";
-import dashboardData from "../data/adminDashboard.json";
+import React, { useEffect, useState } from "react";
 
 function AdminDashboard() {
+  const [dashboardData, setDashboardData] = useState(null);
+
+  useEffect(() => {
+    fetch("/json/adminDashboard.json")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load adminDashboard.json");
+        return res.json();
+      })
+      .then((data) => setDashboardData(data))
+      .catch((err) => console.error(err));
+  }, []);
+
   const handleCardClick = (action) => {
-    alert(`Clicked on: ${action}`); // Placeholder for actual navigation
+    alert(`Clicked on: ${action}`); // placeholder
   };
+
+  if (!dashboardData) {
+    return <div className="admin-dashboard">Loading...</div>;
+  }
 
   return (
     <div className="admin-dashboard">
