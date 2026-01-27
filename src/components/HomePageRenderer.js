@@ -467,62 +467,58 @@ const renderHighlights = (highlights) => {
 // Render CTA
 const renderCTA = (cta) => {
   const layout = getLayout(cta) || {};
-  const padding = layout.padding || "48px";
+  const padding = layout.padding || (width < 768 ? "3rem 1.5rem" : "4rem 0");
 
   return (
     <section
-    style={{
-      maxWidth: "1200px",
-      margin: "1rem auto",
-      padding: width < 768 ? "3rem 1.5rem" : "4rem 0",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      textAlign: "center",
-  
-      background: `
-        linear-gradient(
-          135deg,
-          rgba(255,127,80,0.10) 0%,
-          rgba(255,255,255,0.85) 45%,
-          rgba(255,255,255,0.95) 100%
-        ),
-        url(${cta.background_image?.placeholder})
-      `,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-  
-      borderRadius: "28px",
-      boxShadow:
-        "0 30px 60px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.6)",
-  
-      animation: "fadeInUp 1s ease forwards",
-    }}
-        >
-       <h2
-  style={{
-    fontSize: "clamp(2.6rem, 5vw, 3.4rem)",
-    fontWeight: 800,
-    color: "#111827",
-    marginBottom: "1rem",
-    lineHeight: 1.15,
-  }}
->
-  {cta.headline}
-</h2>
+      style={{
+        maxWidth: "1200px",
+        margin: "1rem auto",
+        padding: padding,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        textAlign: "center",
+        background: `
+          linear-gradient(
+            135deg,
+            rgba(255,127,80,0.10) 0%,
+            rgba(255,255,255,0.85) 45%,
+            rgba(255,255,255,0.95) 100%
+          ),
+          url(${cta.background_image?.placeholder})
+        `,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        borderRadius: "28px",
+        boxShadow: "0 30px 60px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.6)",
+        animation: "fadeInUp 1s ease forwards",
+      }}
+    >
+      <h2
+        style={{
+          fontSize: "clamp(2.6rem, 5vw, 3.4rem)",
+          fontWeight: 800,
+          color: "#111827",
+          marginBottom: "1rem",
+          lineHeight: 1.15,
+        }}
+      >
+        {cta.headline}
+      </h2>
 
-<p
-  style={{
-    maxWidth: "720px",
-    fontSize: "1.2rem",
-    lineHeight: 1.75,
-    color: "#374151",
-    marginBottom: "2.5rem",
-  }}
->
-  {cta.subtext}
-</p>
-    
+      <p
+        style={{
+          maxWidth: "720px",
+          fontSize: "1.2rem",
+          lineHeight: 1.75,
+          color: "#374151",
+          marginBottom: "2.5rem",
+        }}
+      >
+        {cta.subtext}
+      </p>
+
       <div style={{ marginTop: "1.5rem", display: "flex", gap: "1rem" }}>
         {cta.buttons?.map((btn) => (
           <button
@@ -536,12 +532,8 @@ const renderCTA = (cta) => {
               cursor: "pointer",
               transition: "all 0.3s",
             }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "translateY(-2px)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.transform = "scale(1)")
-            }
+            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
             onClick={() => {
               if (btn.action === "navigate_to_admissions")
                 window.location.href = "/admissions";
