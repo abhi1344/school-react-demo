@@ -1,0 +1,151 @@
+
+{
+  "portalTitle": "EduAdmin v1.0",
+  "navigation": [
+    { "id": "overview", "label": "Dashboard Overview", "icon": "LayoutDashboard" },
+    { "id": "students", "label": "Student Directory", "icon": "Users" },
+    { "id": "teachers", "label": "Faculty Management", "icon": "GraduationCap" },
+    { "id": "classes", "label": "Academic Classes", "icon": "BookOpen" },
+    { "id": "notices", "label": "Notices & Bulletins", "icon": "Bell" }
+  ],
+  "pages": {
+    "overview": {
+      "title": "Welcome, Administrator",
+      "sections": [
+        {
+          "id": "quickStats",
+          "type": "stats",
+          "title": "Quick Overview",
+          "data": [
+            { "label": "Total Students", "value": "1,284", "trend": "+12%" },
+            { "label": "Active Teachers", "value": "84", "trend": "+2" },
+            { "label": "Open Classes", "value": "42", "trend": "Stable" },
+            { "label": "New Notices", "value": "5", "trend": "Priority" }
+          ]
+        }
+      ]
+    },
+    "students": {
+      "title": "Students",
+      "sections": [
+        {
+          "id": "studentTable",
+          "type": "table",
+          "title": "Enrolled Students",
+          "columns": [
+            { "key": "id", "header": "Student ID" },
+            { "key": "name", "header": "Full Name" },
+            { "key": "grade", "header": "Grade" },
+            { "key": "parentContact", "header": "Parent Contact" },
+            { "key": "status", "header": "Status" }
+          ],
+          "data": [
+            { "id": "STU001", "name": "Alice Johnson", "grade": "10th", "parentContact": "+1 555-0101", "status": "Active" },
+            { "id": "STU002", "name": "Bob Smith", "grade": "11th", "parentContact": "+1 555-0102", "status": "Active" },
+            { "id": "STU003", "name": "Charlie Brown", "grade": "9th", "parentContact": "+1 555-0103", "status": "Suspended" }
+          ]
+        },
+        {
+          "id": "addStudentForm",
+          "type": "form",
+          "title": "Register New Student",
+          "fields": [
+            { "name": "fullName", "label": "Full Name", "type": "text", "required": true },
+            { "name": "email", "label": "Email Address", "type": "email", "required": true },
+            { "name": "grade", "label": "Assigned Grade", "type": "select", "options": ["9th", "10th", "11th", "12th"] },
+            { "name": "enrollmentDate", "label": "Enrollment Date", "type": "date" }
+          ]
+        }
+      ]
+    },
+    "teachers": {
+      "title": "Teachers",
+      "sections": [
+        {
+          "id": "teacherTable",
+          "type": "table",
+          "title": "Staff Directory",
+          "columns": [
+            { "key": "name", "header": "Name" },
+            { "key": "department", "header": "Department" },
+            { "key": "email", "header": "Email" },
+            { "key": "classes", "header": "Classes Taught" }
+          ],
+          "data": [
+            { "name": "Dr. Sarah Miller", "department": "Science", "email": "s.miller@school.edu", "classes": "Physics 101, Bio 2" },
+            { "name": "Mr. James Wilson", "department": "Mathematics", "email": "j.wilson@school.edu", "classes": "Calc AB, Algebra" }
+          ]
+        },
+        {
+          "id": "addTeacherForm",
+          "type": "form",
+          "title": "Onboard New Faculty",
+          "fields": [
+            { "name": "tName", "label": "Teacher Name", "type": "text", "required": true },
+            { "name": "tDept", "label": "Department", "type": "select", "options": ["Science", "Math", "Arts", "Humanities"] },
+            { "name": "tBio", "label": "Short Bio", "type": "textarea" }
+          ]
+        }
+      ]
+    },
+    "classes": {
+      "title": "Classes",
+      "sections": [
+        {
+          "id": "classTable",
+          "type": "table",
+          "title": "Upcoming Sessions",
+          "columns": [
+            { "key": "code", "header": "Class Code" },
+            { "key": "subject", "header": "Subject" },
+            { "key": "room", "header": "Room Number" },
+            { "key": "capacity", "header": "Max Capacity" }
+          ],
+          "data": [
+            { "code": "SCI-101", "subject": "Introdution to Physics", "room": "A-12", "capacity": "30" },
+            { "code": "MATH-202", "subject": "Advanced Calculus", "room": "B-04", "capacity": "25" }
+          ]
+        },
+        {
+          "id": "addClassForm",
+          "type": "form",
+          "title": "Create New Class Section",
+          "fields": [
+            { "name": "cName", "label": "Class Title", "type": "text" },
+            { "name": "cRoom", "label": "Room Number", "type": "text" },
+            { "name": "cCap", "label": "Student Capacity", "type": "number" }
+          ]
+        }
+      ]
+    },
+    "notices": {
+      "title": "Notices",
+      "sections": [
+        {
+          "id": "noticeTable",
+          "type": "table",
+          "title": "Active Announcements",
+          "columns": [
+            { "key": "date", "header": "Date Posted" },
+            { "key": "title", "header": "Title" },
+            { "key": "target", "header": "Target Audience" }
+          ],
+          "data": [
+            { "date": "2024-05-15", "title": "Summer Break Dates Confirmed", "target": "All" },
+            { "date": "2024-05-12", "title": "Teacher Workshop Schedule", "target": "Faculty" }
+          ]
+        },
+        {
+          "id": "addNoticeForm",
+          "type": "form",
+          "title": "Post New Bulletin",
+          "fields": [
+            { "name": "nTitle", "label": "Bulletin Title", "type": "text" },
+            { "name": "nContent", "label": "Content Body", "type": "textarea" },
+            { "name": "nTarget", "label": "Target Audience", "type": "select", "options": ["All", "Students", "Faculty", "Parents"] }
+          ]
+        }
+      ]
+    }
+  }
+}

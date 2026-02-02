@@ -1,7 +1,6 @@
 
 import React, { useEffect, useState } from "react";
 import { processFormData } from "../dataAdapter/index.js";
-import { supabase } from "../supabaseClient.js";
 
 // --- Icon Helper for Lucide ---
 const Icon = ({ name, className = "" }) => {
@@ -20,13 +19,13 @@ const AdminDashboard = () => {
   const [rules, setRules] = useState(null);
   const [activeTab, setActiveTab] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   
-  // localData acts as our Reactive Cache for the locked renderer
+  // L2: In-memory store for table sections
   const [localData, setLocalData] = useState({});
 
   useEffect(() => {
+    // Load Configuration and Rules in parallel
     Promise.all([
       fetch("/json/adminDashboard.json").then(res => res.json()),
       fetch("/json/adapter.rules.json").then(res => res.json())
@@ -56,50 +55,23 @@ const AdminDashboard = () => {
     });
   }, []);
 
-  // L4: Write-Flow via Supabase
-  const handleFormSubmit = async (e, sectionId) => {
+  // L3: Form Submission Logic - Decoupled via Adapter
+  const handleFormSubmit = (e, sectionId) => {
     e.preventDefault();
-    if (!rules || isSubmitting) return;
+    if (!rules) return;
 
-    setIsSubmitting(true);
     const formData = new FormData(e.target);
     const values = Object.fromEntries(formData.entries());
     
-    // 1. ADAPTER: Resolve DB Table, UI Section, and Normalized Record
-    const { tableId, uiSectionId, record } = processFormData(sectionId, values, rules);
+    // CALL ADAPTER: Transform UI values into Schema values
+    const { tableId, record } = processFormData(sectionId, values, rules);
 
-    if (!tableId) {
-      console.error("Adapter failed to resolve target table for:", sectionId);
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      // 2. REMOTE PERSISTENCE: Write to Supabase
-      if (rules.system_contract.persistence === "supabase_remote_state") {
-        console.log(`Writing to Supabase table: ${tableId}`, record);
-        const { error: dbError } = await supabase
-          .from(tableId)
-          .insert([record]);
-
-        if (dbError) throw dbError;
-      }
-
-      // 3. UI SYNC: Update Local Cache for the locked renderer
-      // We map the DB table back to the UI Section ID (e.g., 'students' -> 'studentTable')
-      const targetStateKey = uiSectionId || tableId;
+    if (tableId) {
       setLocalData(prev => ({
         ...prev,
-        [targetStateKey]: [...(prev[targetStateKey] || []), record]
+        [tableId]: [...(prev[tableId] || []), record]
       }));
-
       e.target.reset();
-      console.log("Persistence successful.");
-    } catch (err) {
-      console.error("Supabase Submission Error:", err.message);
-      alert(`Submission failed: ${err.message}. Data preserved in console.`);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -109,7 +81,7 @@ const AdminDashboard = () => {
 
   const activePage = config.pages[activeTab];
 
-  // RENDERER FUNCTIONS (LOCKED - MUST NOT BE MODIFIED)
+  // RENDERER FUNCTIONS (REMAIN UNCHANGED)
   const renderSection = (section) => {
     switch (section.type) {
       case "stats":
@@ -178,25 +150,23 @@ const AdminDashboard = () => {
                       {field.label} {field.required && <span style={{ color: "red" }}>*</span>}
                     </label>
                     {field.type === "select" ? (
-                      <select className="select" name={field.name} required={field.required} disabled={isSubmitting}>
+                      <select className="select" name={field.name} required={field.required}>
                         <option value="">Select option...</option>
                         {field.options?.map((opt) => (
                           <option key={opt} value={opt}>{opt}</option>
                         ))}
                       </select>
                     ) : field.type === "textarea" ? (
-                      <textarea className="textarea" name={field.name} placeholder={field.placeholder} required={field.required} disabled={isSubmitting} />
+                      <textarea className="textarea" name={field.name} placeholder={field.placeholder} required={field.required} />
                     ) : (
-                      <input name={field.name} type={field.type} className="input" placeholder={field.placeholder} required={field.required} disabled={isSubmitting} />
+                      <input name={field.name} type={field.type} className="input" placeholder={field.placeholder} required={field.required} />
                     )}
                   </div>
                 ))}
               </div>
               <div className="button-group">
-                <button type="reset" className="button-secondary" disabled={isSubmitting}>Reset</button>
-                <button type="submit" className="button-primary" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Save Changes"}
-                </button>
+                <button type="reset" className="button-secondary">Reset</button>
+                <button type="submit" className="button-primary">Save Changes</button>
               </div>
             </form>
           </div>
@@ -227,6 +197,17 @@ const AdminDashboard = () => {
             </button>
           ))}
         </nav>
+        
+        <div style={{ marginTop: 'auto' }}>
+           <button className="nav-item">
+              <Icon name="Settings" className="w-4 h-4" />
+              <span>Settings</span>
+           </button>
+           <button className="nav-item">
+              <Icon name="LogOut" className="w-4 h-4" />
+              <span>Sign Out</span>
+           </button>
+        </div>
       </aside>
 
       <main className="main-content">
@@ -234,6 +215,7 @@ const AdminDashboard = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>{activePage.title}</h2>
           </div>
+          
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
             <div className="search-box">
               <Icon name="Search" className="text-muted" style={{ width: '16px', height: '16px' }} />

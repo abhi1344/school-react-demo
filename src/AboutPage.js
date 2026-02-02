@@ -18,7 +18,8 @@ function AboutPage() {
     return <div className="page about-page">Loading...</div>;
   }
 
-  const { sections } = aboutJson;return (
+  const { sections } = aboutJson;
+  return (
     <div className="page about-page">
       <h1>{sections.intro.headline}</h1>
       <p>{sections.intro.description}</p>

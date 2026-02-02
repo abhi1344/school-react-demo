@@ -1,0 +1,4 @@
+Student ID,Full Name,Grade,Parent Contact,Enrollment Date,Status,Section
+STU001,Alice Johnson,10th,alice.parent@email.com,2023-09-01,Active,Enrolled Students
+STU002,Bob Smith,11th,bob.parent@email.com,2023-09-02,Active,Enrolled Students
+STU003,Charlie Brown,9th,charlie.parent@email.com,2023-09-03,Suspended,Enrolled Students

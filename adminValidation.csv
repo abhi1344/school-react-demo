@@ -1,0 +1,10 @@
+Page,Section ID,Type,Expected CSS Class,JSX Uses Class,CSS Exists
+overview,quickStats,stats,stats-card,YES,YES
+students,studentTable,table,table-card,YES,YES
+students,addStudentForm,form,form-card,YES,YES
+teachers,teacherTable,table,table-card,YES,YES
+teachers,addTeacherForm,form,form-card,YES,YES
+classes,classTable,table,table-card,YES,YES
+classes,addClassForm,form,form-card,YES,YES
+notices,noticeTable,table,table-card,YES,YES
+notices,addNoticeForm,form,form-card,YES,YES

@@ -1,7 +1,5 @@
 
 import React, { useEffect, useState } from "react";
-import { processFormData } from "../dataAdapter/index.js";
-import { supabase } from "../supabaseClient.js";
 
 // --- Icon Helper for Lucide ---
 const Icon = ({ name, className = "" }) => {
@@ -17,90 +15,83 @@ const Icon = ({ name, className = "" }) => {
 
 const AdminDashboard = () => {
   const [config, setConfig] = useState(null);
-  const [rules, setRules] = useState(null);
   const [activeTab, setActiveTab] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   
-  // localData acts as our Reactive Cache for the locked renderer
+  // L2: In-memory store for table sections
   const [localData, setLocalData] = useState({});
 
   useEffect(() => {
-    Promise.all([
-      fetch("/json/adminDashboard.json").then(res => res.json()),
-      fetch("/json/adapter.rules.json").then(res => res.json())
-    ])
-    .then(([data, adapterRules]) => {
-      setConfig(data);
-      setRules(adapterRules);
-      
-      const initialData = {};
-      Object.values(data.pages).forEach(page => {
-        page.sections.forEach(section => {
-          if (section.type === "table") {
-            initialData[section.id] = section.data || [];
-          }
+   fetch("/json/adminDashboard.json")
+      .then((res) => {
+        if (!res.ok) throw new Error("Could not load dashboard configuration.");
+        return res.json();
+      })
+      .then((data) => {
+        setConfig(data);
+        
+        // L2: Initialize localData from JSON structure on load
+        const initialData = {};
+        Object.values(data.pages).forEach(page => {
+          page.sections.forEach(section => {
+            if (section.type === "table") {
+              initialData[section.id] = section.data || [];
+            }
+          });
         });
-      });
-      setLocalData(initialData);
+        setLocalData(initialData);
 
-      if (data.navigation && data.navigation.length > 0) {
-        setActiveTab(data.navigation[0].id);
-      }
-      setLoading(false);
-    })
-    .catch((err) => {
-      setError(err.message);
-      setLoading(false);
-    });
+        if (data.navigation && data.navigation.length > 0) {
+          setActiveTab(data.navigation[0].id);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
   }, []);
 
-  // L4: Write-Flow via Supabase
-  const handleFormSubmit = async (e, sectionId) => {
+  // L2: Form Submission Logic - Purely updates localData state
+  const handleFormSubmit = (e, sectionId) => {
     e.preventDefault();
-    if (!rules || isSubmitting) return;
-
-    setIsSubmitting(true);
     const formData = new FormData(e.target);
     const values = Object.fromEntries(formData.entries());
     
-    // 1. ADAPTER: Resolve DB Table, UI Section, and Normalized Record
-    const { tableId, uiSectionId, record } = processFormData(sectionId, values, rules);
+    // Strict ID Mapping Table
+    const tableMap = {
+      "addStudentForm": "studentTable",
+      "addTeacherForm": "teacherTable",
+      "addClassForm": "classTable",
+      "addNoticeForm": "noticeTable"
+    };
 
-    if (!tableId) {
-      console.error("Adapter failed to resolve target table for:", sectionId);
-      setIsSubmitting(false);
-      return;
-    }
+    const targetTableId = tableMap[sectionId];
+    if (!targetTableId) return;
 
-    try {
-      // 2. REMOTE PERSISTENCE: Write to Supabase
-      if (rules.system_contract.persistence === "supabase_remote_state") {
-        console.log(`Writing to Supabase table: ${tableId}`, record);
-        const { error: dbError } = await supabase
-          .from(tableId)
-          .insert([record]);
+    // Normalize field names to match table keys for visual consistency
+    const newRecord = { ...values };
+    if (values.fullName) newRecord.name = values.fullName;
+    if (values.email && targetTableId === "studentTable") newRecord.parentContact = values.email;
+    if (values.tName) newRecord.name = values.tName;
+    if (values.tDept) newRecord.department = values.tDept;
+    if (values.cName) newRecord.subject = values.cName;
+    if (values.cRoom) newRecord.room = values.cRoom;
+    if (values.nTitle) newRecord.title = values.nTitle;
+    if (values.nTarget) newRecord.target = values.nTarget;
+    
+    // Default system values
+    if (!newRecord.status) newRecord.status = "Active";
+    if (!newRecord.id) newRecord.id = "NEW-" + Math.floor(Math.random() * 1000);
+    if (!newRecord.date) newRecord.date = new Date().toISOString().split('T')[0];
 
-        if (dbError) throw dbError;
-      }
-
-      // 3. UI SYNC: Update Local Cache for the locked renderer
-      // We map the DB table back to the UI Section ID (e.g., 'students' -> 'studentTable')
-      const targetStateKey = uiSectionId || tableId;
-      setLocalData(prev => ({
-        ...prev,
-        [targetStateKey]: [...(prev[targetStateKey] || []), record]
-      }));
-
-      e.target.reset();
-      console.log("Persistence successful.");
-    } catch (err) {
-      console.error("Supabase Submission Error:", err.message);
-      alert(`Submission failed: ${err.message}. Data preserved in console.`);
-    } finally {
-      setIsSubmitting(false);
-    }
+    setLocalData(prev => ({
+      ...prev,
+      [targetTableId]: [...(prev[targetTableId] || []), newRecord]
+    }));
+    
+    e.target.reset();
   };
 
   if (loading) return <div className="empty-state">Loading portal configuration...</div>;
@@ -109,7 +100,7 @@ const AdminDashboard = () => {
 
   const activePage = config.pages[activeTab];
 
-  // RENDERER FUNCTIONS (LOCKED - MUST NOT BE MODIFIED)
+  // RENDERER FUNCTIONS (REMAIN UNCHANGED)
   const renderSection = (section) => {
     switch (section.type) {
       case "stats":
@@ -145,7 +136,7 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {(section.data || []).map((row, idx) => (
+                  {section.data.map((row, idx) => (
                     <tr key={idx}>
                       {section.columns.map((col) => (
                         <td key={col.key}>
@@ -178,25 +169,23 @@ const AdminDashboard = () => {
                       {field.label} {field.required && <span style={{ color: "red" }}>*</span>}
                     </label>
                     {field.type === "select" ? (
-                      <select className="select" name={field.name} required={field.required} disabled={isSubmitting}>
+                      <select className="select" name={field.name} required={field.required}>
                         <option value="">Select option...</option>
                         {field.options?.map((opt) => (
                           <option key={opt} value={opt}>{opt}</option>
                         ))}
                       </select>
                     ) : field.type === "textarea" ? (
-                      <textarea className="textarea" name={field.name} placeholder={field.placeholder} required={field.required} disabled={isSubmitting} />
+                      <textarea className="textarea" name={field.name} placeholder={field.placeholder} required={field.required} />
                     ) : (
-                      <input name={field.name} type={field.type} className="input" placeholder={field.placeholder} required={field.required} disabled={isSubmitting} />
+                      <input name={field.name} type={field.type} className="input" placeholder={field.placeholder} required={field.required} />
                     )}
                   </div>
                 ))}
               </div>
               <div className="button-group">
-                <button type="reset" className="button-secondary" disabled={isSubmitting}>Reset</button>
-                <button type="submit" className="button-primary" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Save Changes"}
-                </button>
+                <button type="reset" className="button-secondary">Reset</button>
+                <button type="submit" className="button-primary">Save Changes</button>
               </div>
             </form>
           </div>
@@ -227,6 +216,17 @@ const AdminDashboard = () => {
             </button>
           ))}
         </nav>
+        
+        <div style={{ marginTop: 'auto' }}>
+           <button className="nav-item">
+              <Icon name="Settings" className="w-4 h-4" />
+              <span>Settings</span>
+           </button>
+           <button className="nav-item">
+              <Icon name="LogOut" className="w-4 h-4" />
+              <span>Sign Out</span>
+           </button>
+        </div>
       </aside>
 
       <main className="main-content">
@@ -234,6 +234,7 @@ const AdminDashboard = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>{activePage.title}</h2>
           </div>
+          
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
             <div className="search-box">
               <Icon name="Search" className="text-muted" style={{ width: '16px', height: '16px' }} />
@@ -246,6 +247,7 @@ const AdminDashboard = () => {
 
         <div className="content-body">
           {activePage.sections.map((section) => {
+            // L2: Inject local mutable data into section before passing to the untouched renderer
             const displaySection = section.type === "table" 
               ? { ...section, data: localData[section.id] || section.data } 
               : section;

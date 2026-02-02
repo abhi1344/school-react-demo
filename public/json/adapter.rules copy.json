@@ -1,0 +1,49 @@
+ {
+  "system_contract": {
+    "persistence": "in_memory_local_state",
+    "rendering_engine": "locked_react_component",
+    "read_flow": "JSON -> localData -> Renderer",
+    "write_flow": "Form Submission -> handleFormSubmit -> Adapter -> localData update -> Renderer"
+      },
+  "renderer_assumptions": {
+    "table_injection": "The renderer expects section.data to contain an array of objects where keys match section.columns[].key.",
+    "form_output": "The handleFormSubmit function consumes FormData entries keyed by the 'name' attribute of form fields."
+  },
+  "adapter_logic": {
+    "target_table_resolution": {
+      "addStudentForm": "studentTable",
+      "addTeacherForm": "teacherTable",
+      "addClassForm": "classTable",
+      "addNoticeForm": "noticeTable"
+    },
+    "field_name_normalization": {
+      "fullName": "name",
+      "email": "parentContact",
+      "tName": "name",
+      "tDept": "department",
+      "cName": "subject",
+      "cRoom": "room",
+      "nTitle": "title",
+      "nTarget": "target"
+    },
+    "default_value_injection": {
+      "status": "Active",
+      "id": "NEW-{random}",
+      "date": "current_iso_date"
+    }
+  },
+  "issue_classification": {
+    "safe_semantic_mismatches": [
+      "Parent Contact Email (Form Label) vs Parent Contact (Table Header)",
+      "Room Number (Form Label) vs Room (Table Header)",
+      "Max Student Capacity (Form Label) vs Capacity (Table Header)",
+      "Publish Date (Form Label) vs Date Posted (Table Header)",
+      "Detailed Content (Form Label) vs Preview Content (Table Header)"
+    ],
+    "requires_adapter_rule": [
+      "Legacy hardcoded field mapping aliases in AdminDashboard.js",
+      "Manual system field generation (ID, Date, Status) in form handler"
+    ]
+  }
+}
+
