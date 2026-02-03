@@ -22,21 +22,38 @@
       "teachers": "teacherTable",
       "classes": "classTable",
       "notices": "noticeTable"
-    },"section_to_form": {
-      "studentTable": "addStudentForm",
-      "teacherTable": "addTeacherForm",
-      "classTable": "addClassForm",
-      "noticeTable": "addNoticeForm"
-    }, 
+    },
     "field_name_normalization": {
-      "fullName": "name",
-      "email": "parentContact",
-      "tName": "name",
-      "tDept": "department",
-      "cName": "subject",
-      "cRoom": "room",
-      "nTitle": "title",
-      "nTarget": "target"
+      "addStudentForm": {
+        "studentCode": "studentCode",
+        "name": "name",
+        "grade": "grade",
+        "parentContact": "parentContact",
+        "enrollmentDate": "enrollmentDate",
+        "status": "status"
+      },
+      "addTeacherForm": {
+        "staffCode": "staffCode",
+        "name": "name",
+        "department": "department",
+        "email": "email",
+        "classes": "classes",
+        "bio": "bio"
+      },
+      "addClassForm": {
+        "classCode": "classCode",
+        "code": "code",
+        "subject": "subject",
+        "room": "room",
+        "capacity": "capacity"
+      },      
+      "addNoticeForm": {
+        "noticeCode": "noticeCode",
+        "date": "date",
+        "title": "title",
+        "target": "target",
+        "content": "content"
+      }     
     },
     "default_value_injection": {
       "status": "Active",

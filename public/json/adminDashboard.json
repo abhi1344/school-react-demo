@@ -33,7 +33,7 @@
           "type": "table",
           "title": "Enrolled Students",
           "columns": [
-            { "key": "id", "header": "Student ID" },
+            { "key": "studentCode", "header": "Student ID" },
             { "key": "name", "header": "Full Name" },
             { "key": "grade", "header": "Grade" },
             { "key": "parentContact", "header": "Parent Contact" },
@@ -41,9 +41,9 @@
             { "key": "status", "header": "Status" }
           ],
           "data": [
-            { "id": "STU001", "name": "Alice Johnson", "grade": "10th", "parentContact": "alice.parent@email.com", "enrollmentDate": "2023-09-01", "status": "Active" },
-            { "id": "STU002", "name": "Bob Smith", "grade": "11th", "parentContact": "bob.parent@email.com", "enrollmentDate": "2023-09-02", "status": "Active" },
-            { "id": "STU003", "name": "Charlie Brown", "grade": "9th", "parentContact": "charlie.parent@email.com", "enrollmentDate": "2023-09-03", "status": "Suspended" }
+            { "studentCode": "STU001", "name": "Alice Johnson", "grade": "10th", "parentContact": "alice.parent@email.com", "enrollmentDate": "2023-09-01", "status": "Active" },
+            { "studentCode": "STU002", "name": "Bob Smith", "grade": "11th", "parentContact": "bob.parent@email.com", "enrollmentDate": "2023-09-02", "status": "Active" },
+            { "studentCode": "STU003", "name": "Charlie Brown", "grade": "9th", "parentContact": "charlie.parent@email.com", "enrollmentDate": "2023-09-03", "status": "Suspended" }
           ]
         },
         {
@@ -51,7 +51,7 @@
           "type": "form",
           "title": "Register New Student",
           "fields": [
-            { "name": "id", "label": "Student ID", "type": "text", "required": true, "placeholder": "STUXXX" },
+            { "name": "studentCode", "label": "Student Reference Code", "type": "text", "required": true, "placeholder": "e.g. STU-2024-001" },
             { "name": "name", "label": "Full Name", "type": "text", "required": true },
             { "name": "parentContact", "label": "Parent Contact Email", "type": "email", "required": true },
             { "name": "grade", "label": "Assigned Grade", "type": "select", "options": ["9th", "10th", "11th", "12th"], "required": true },
@@ -69,7 +69,7 @@
           "type": "table",
           "title": "Staff Directory",
           "columns": [
-            { "key": "id", "header": "Staff ID" },
+            { "key": "staffCode", "header": "Staff ID" },
             { "key": "name", "header": "Full Name" },
             { "key": "department", "header": "Department" },
             { "key": "email", "header": "Email Address" },
@@ -77,8 +77,8 @@
             { "key": "bio", "header": "Biography" }
           ],
           "data": [
-            { "id": "TCH001", "name": "Dr. Sarah Miller", "department": "Science", "email": "s.miller@school.edu", "classes": "Physics 101, Bio 2", "bio": "Ph.D. in Applied Physics with 10 years experience." },
-            { "id": "TCH002", "name": "Mr. James Wilson", "department": "Mathematics", "email": "j.wilson@school.edu", "classes": "Calc AB, Algebra", "bio": "Former structural engineer passionate about Calculus." }
+            { "staffCode": "TCH001", "name": "Dr. Sarah Miller", "department": "Science", "email": "s.miller@school.edu", "classes": "Physics 101, Bio 2", "bio": "Ph.D. in Applied Physics with 10 years experience." },
+            { "staffCode": "TCH002", "name": "Mr. James Wilson", "department": "Mathematics", "email": "j.wilson@school.edu", "classes": "Calc AB, Algebra", "bio": "Former structural engineer passionate about Calculus." }
           ]
         },
         {
@@ -86,7 +86,7 @@
           "type": "form",
           "title": "Onboard New Faculty",
           "fields": [
-            { "name": "id", "label": "Staff ID", "type": "text", "required": true, "placeholder": "TCHXXX" },
+            { "name": "staffCode", "label": "Faculty Reference Code", "type": "text", "required": true, "placeholder": "e.g. FAC-501" },
             { "name": "name", "label": "Full Name", "type": "text", "required": true },
             { "name": "department", "label": "Department", "type": "select", "options": ["Science", "Math", "Arts", "Humanities"], "required": true },
             { "name": "email", "label": "Email Address", "type": "email", "required": true },
@@ -104,15 +104,15 @@
           "type": "table",
           "title": "Upcoming Sessions",
           "columns": [
-            { "key": "id", "header": "System ID" },
+            { "key": "classCode", "header": "Ref Code" },
             { "key": "code", "header": "Class Code" },
             { "key": "subject", "header": "Class Title" },
             { "key": "room", "header": "Room" },
             { "key": "capacity", "header": "Capacity" }
           ],
           "data": [
-            { "id": "CLS101", "code": "SCI-101", "subject": "Introduction to Physics", "room": "A-12", "capacity": "30" },
-            { "id": "CLS202", "code": "MATH-202", "subject": "Advanced Calculus", "room": "B-04", "capacity": "25" }
+            { "classCode": "CLS101", "code": "SCI-101", "subject": "Introduction to Physics", "room": "A-12", "capacity": "30" },
+            { "classCode": "CLS202", "code": "MATH-202", "subject": "Advanced Calculus", "room": "B-04", "capacity": "25" }
           ]
         },
         {
@@ -120,8 +120,8 @@
           "type": "form",
           "title": "Create New Class Section",
           "fields": [
-            { "name": "id", "label": "System ID", "type": "text", "required": true, "placeholder": "CLSXXX" },
-            { "name": "code", "label": "Class Code", "type": "text", "required": true, "placeholder": "e.g. ARTS-101" },
+            { "name": "classCode", "label": "Class Reference Code", "type": "text", "required": true, "placeholder": "e.g. SEC-A1" },
+            { "name": "code", "label": "Academic Code", "type": "text", "required": true, "placeholder": "e.g. ARTS-101" },
             { "name": "subject", "label": "Class Title", "type": "text", "required": true },
             { "name": "room", "label": "Room Number", "type": "text", "required": true },
             { "name": "capacity", "label": "Max Student Capacity", "type": "number", "required": true }
@@ -137,15 +137,15 @@
           "type": "table",
           "title": "Active Announcements",
           "columns": [
-            { "key": "id", "header": "Notice ID" },
+            { "key": "noticeCode", "header": "Notice ID" },
             { "key": "date", "header": "Date Posted" },
             { "key": "title", "header": "Bulletin Title" },
             { "key": "target", "header": "Target Audience" },
             { "key": "content", "header": "Preview Content" }
           ],
           "data": [
-            { "id": "NTC001", "date": "2024-05-15", "title": "Summer Break Dates Confirmed", "target": "All", "content": "Official dates for the summer break have been published." },
-            { "id": "NTC002", "date": "2024-05-12", "title": "Teacher Workshop Schedule", "target": "Faculty", "content": "The upcoming workshop focuses on AI in education." }
+            { "noticeCode": "NTC001", "date": "2024-05-15", "title": "Summer Break Dates Confirmed", "target": "All", "content": "Official dates for the summer break have been published." },
+            { "noticeCode": "NTC002", "date": "2024-05-12", "title": "Teacher Workshop Schedule", "target": "Faculty", "content": "The upcoming workshop focuses on AI in education." }
           ]
         },
         {
@@ -153,7 +153,7 @@
           "type": "form",
           "title": "Post New Bulletin",
           "fields": [
-            { "name": "id", "label": "Notice ID", "type": "text", "required": true, "placeholder": "NTCXXX" },
+            { "name": "noticeCode", "label": "Bulletin Reference", "type": "text", "required": true, "placeholder": "e.g. N-2024-5" },
             { "name": "date", "label": "Publish Date", "type": "date", "required": true },
             { "name": "title", "label": "Bulletin Title", "type": "text", "required": true },
             { "name": "target", "label": "Target Audience", "type": "select", "options": ["All", "Students", "Faculty", "Parents"], "required": true },

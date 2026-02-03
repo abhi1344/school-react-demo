@@ -1,66 +1,81 @@
 /**
  * Pure Adapter Module - LEVEL 4
  * Responsibility: Map Form Inputs -> Normalized DB Records
+ * STRICT ARCHITECTURE: Only fields explicitly mapped in adapter.rules.json are emitted.
+ * Drops all unknown UI keys to prevent Supabase "column not found" errors.
  */
 
  export const processFormData = (formIdOrSectionId, formValues, rules) => {
-    const { adapter_logic } = rules;
+  const { adapter_logic, system_contract } = rules;
+
+  // --- 1. Context Resolution ---
+  const sectionToFormMap = adapter_logic.section_to_form || {};
+  const formId =
+    formIdOrSectionId in adapter_logic.target_table_resolution
+      ? formIdOrSectionId
+      : sectionToFormMap[formIdOrSectionId];
+
+  if (!formId) {
+    console.error("Adapter Error: Unresolved form context for", formIdOrSectionId);
+    return { tableId: null, uiSectionId: null, record: null };
+  }
+
+  const tableId = adapter_logic.target_table_resolution[formId];
+  const uiSectionId = adapter_logic.ui_section_mapping[tableId];
+  const normalizationMap = adapter_logic.field_name_normalization[formId] || {};
+  const defaults = adapter_logic.default_value_injection;
+
+  // --- 2. Strict Whitelist Normalization ---
+  // We initialize an empty record and ONLY populate it using the mapping rules.
+  // This ensures UI-only keys (e.g., 'studentCode') never reach the DB unless explicitly mapped.
+  const record = {};
   
-    // --- Defensive: sectionId -> formId mapping
-    const sectionToFormMap = adapter_logic.section_to_form || {};
-    const formId =
-      formIdOrSectionId in adapter_logic.target_table_resolution
-        ? formIdOrSectionId
-        : sectionToFormMap[formIdOrSectionId];
-  
-    if (!formId) {
-      console.error(
-        "processFormData: Invalid formId or sectionId passed:",
-        formIdOrSectionId
-      );
-      return { tableId: null, uiSectionId: null, record: null };
+  Object.keys(normalizationMap).forEach((uiKey) => {
+    const dbColumn = normalizationMap[uiKey];
+    if (formValues[uiKey] !== undefined && formValues[uiKey] !== null) {
+      record[dbColumn] = formValues[uiKey];
     }
-  
-    // 1️⃣ Resolve target table
-    const tableId = adapter_logic.target_table_resolution[formId];
-  
-    // 2️⃣ Resolve UI section for renderer state sync
-    const uiSectionId = adapter_logic.ui_section_mapping[tableId];
-  
-    // 3️⃣ Normalize field names (per-form)
-    const record = { ...formValues };
-    const normalizationMap =
-      adapter_logic.field_name_normalization[formId] || {};
-  
-    Object.keys(formValues).forEach((key) => {
-      if (normalizationMap[key]) {
-        record[normalizationMap[key]] = formValues[key];
-      }
-    });
-  
-    // 4️⃣ Inject system defaults
-    const defaults = adapter_logic.default_value_injection;
-  
-    // ID
-    if (!record.id) {
-      record.id = defaults.id.replace(
+  });
+
+  // Helper to resolve a UI semantic field to a DB column based on the strict whitelist
+  const getDbColumn = (uiKey) => normalizationMap[uiKey];
+
+  // --- 3. System Field Injection (Strict & Context-Aware) ---
+  const isSupabase = system_contract?.persistence === "supabase_remote_state";
+
+  // Status Injection: Only if mapped in the rules for this form
+  const statusDbKey = getDbColumn("status");
+  if (statusDbKey && !record[statusDbKey]) {
+    record[statusDbKey] = defaults.status;
+  }
+
+  // ID Management: Skip for Supabase (PK auto-gen) or inject if mapped and local
+  const idDbKey = getDbColumn("id");
+  if (idDbKey) {
+    if (!record[idDbKey] && !isSupabase) {
+      record[idDbKey] = defaults.id.replace(
         "{random}",
         Math.floor(Math.random() * 10000).toString()
       );
+    } else if (record[idDbKey] === "" && isSupabase) {
+      delete record[idDbKey];
     }
-  
-    // Status
-    if (!record.status) {
-      record.status = defaults.status;
+  }
+
+  // Date Normalization: Inject defaults only if the target columns are whitelisted
+  if (tableId === "students") {
+    const enrollDbKey = getDbColumn("enrollmentDate");
+    if (enrollDbKey && !record[enrollDbKey]) {
+      record[enrollDbKey] = new Date().toISOString().split("T")[0];
     }
-  
-    // Date handling per table
-    if (tableId === "students" && !record.enrollmentDate) {
-      record.enrollmentDate = new Date().toISOString().split("T")[0];
-    } else if (tableId === "notices" && !record.date) {
-      record.date = new Date().toISOString().split("T")[0];
+  } else if (tableId === "notices") {
+    const publishDbKey = getDbColumn("date");
+    if (publishDbKey && !record[publishDbKey]) {
+      record[publishDbKey] = new Date().toISOString().split("T")[0];
     }
-  
-    return { tableId, uiSectionId, record };
-  };
-  
+  }
+
+  // Verification: The emitted record keys must strictly match DB expectations
+  // Any UI keys not found in normalizationMap[formId] have been successfully pruned.
+  return { tableId, uiSectionId, record };
+};

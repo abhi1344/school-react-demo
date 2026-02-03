@@ -1,21 +1,33 @@
- {
+
+{
   "system_contract": {
-    "persistence": "in_memory_local_state",
+    "persistence": "supabase_remote_state",
     "rendering_engine": "locked_react_component",
-    "read_flow": "JSON -> localData -> Renderer",
-    "write_flow": "Form Submission -> handleFormSubmit -> Adapter -> localData update -> Renderer"
-      },
+    "read_flow": "Supabase -> localData -> Renderer",
+    "write_flow": "Form Submission -> handleFormSubmit -> Adapter -> Supabase -> localData update -> Renderer"
+  },
   "renderer_assumptions": {
     "table_injection": "The renderer expects section.data to contain an array of objects where keys match section.columns[].key.",
     "form_output": "The handleFormSubmit function consumes FormData entries keyed by the 'name' attribute of form fields."
   },
   "adapter_logic": {
     "target_table_resolution": {
-      "addStudentForm": "studentTable",
-      "addTeacherForm": "teacherTable",
-      "addClassForm": "classTable",
-      "addNoticeForm": "noticeTable"
+      "addStudentForm": "students",
+      "addTeacherForm": "teachers",
+      "addClassForm": "classes",
+      "addNoticeForm": "notices"
     },
+    "ui_section_mapping": {
+      "students": "studentTable",
+      "teachers": "teacherTable",
+      "classes": "classTable",
+      "notices": "noticeTable"
+    },"section_to_form": {
+      "studentTable": "addStudentForm",
+      "teacherTable": "addTeacherForm",
+      "classTable": "addClassForm",
+      "noticeTable": "addNoticeForm"
+    }, 
     "field_name_normalization": {
       "fullName": "name",
       "email": "parentContact",
@@ -46,4 +58,3 @@
     ]
   }
 }
-

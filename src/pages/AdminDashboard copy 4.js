@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { processFormData } from "../dataAdapter/index.js";
 import { supabase } from "../supabaseClient.js";
@@ -26,67 +27,33 @@ const AdminDashboard = () => {
   const [localData, setLocalData] = useState({});
 
   useEffect(() => {
-    const initPortal = async () => {
-      try {
-        const [configRes, rulesRes] = await Promise.all([
-          fetch("/json/adminDashboard.json"),
-          fetch("/json/adapter.rules.json")
-        ]);
-        
-        if (!configRes.ok || !rulesRes.ok) throw new Error("Failed to load configuration files.");
-        
-        const data = await configRes.json();
-        const adapterRules = await rulesRes.json();
-        
-        setConfig(data);
-        setRules(adapterRules);
-        
-        // 1. Initial configuration: Seed from JSON defaults
-        const initialData = {};
-        Object.values(data.pages).forEach(page => {
-          page.sections.forEach(section => {
-            if (section.type === "table") {
-              initialData[section.id] = section.data || [];
-            }
-          });
+    Promise.all([
+      fetch("/json/adminDashboard.json").then(res => res.json()),
+      fetch("/json/adapter.rules.json").then(res => res.json())
+    ])
+    .then(([data, adapterRules]) => {
+      setConfig(data);
+      setRules(adapterRules);
+      
+      const initialData = {};
+      Object.values(data.pages).forEach(page => {
+        page.sections.forEach(section => {
+          if (section.type === "table") {
+            initialData[section.id] = section.data || [];
+          }
         });
+      });
+      setLocalData(initialData);
 
-        // 2. READ Hydration: Fetch live data from Supabase to replace/augment static data
-        if (adapterRules.system_contract.persistence === "supabase_remote_state") {
-          const uiMap = adapterRules.adapter_logic.ui_section_mapping;
-          const tableNames = Object.keys(uiMap);
-
-          // Fetch all relevant table data in parallel
-          const fetchResults = await Promise.all(
-            tableNames.map(tableName => supabase.from(tableName).select("*"))
-          );
-
-          fetchResults.forEach((res, index) => {
-            if (!res.error && res.data && res.data.length > 0) {
-              const tableName = tableNames[index];
-              const uiSectionId = uiMap[tableName];
-              // Hydrate localData using the resolved UI Section ID
-              initialData[uiSectionId] = res.data;
-            } else if (res.error) {
-              console.warn(`Could not hydrate table ${tableNames[index]}:`, res.error.message);
-            }
-          });
-        }
-
-        setLocalData(initialData);
-
-        if (data.navigation && data.navigation.length > 0) {
-          setActiveTab(data.navigation[0].id);
-        }
-        setLoading(false);
-      } catch (err) {
-        console.error("Dashboard Initialization Error:", err);
-        setError(err.message);
-        setLoading(false);
+      if (data.navigation && data.navigation.length > 0) {
+        setActiveTab(data.navigation[0].id);
       }
-    };
-
-    initPortal();
+      setLoading(false);
+    })
+    .catch((err) => {
+      setError(err.message);
+      setLoading(false);
+    });
   }, []);
 
   // L4: Write-Flow via Supabase
@@ -119,6 +86,7 @@ const AdminDashboard = () => {
       }
 
       // 3. UI SYNC: Update Local Cache for the locked renderer
+      // We map the DB table back to the UI Section ID (e.g., 'students' -> 'studentTable')
       const targetStateKey = uiSectionId || tableId;
       setLocalData(prev => ({
         ...prev,
