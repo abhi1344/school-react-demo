@@ -11,7 +11,8 @@
       "address": "Modern School Campus, City Name, State",
       "phone": "+91-9876543210",
       "email": "info@schoolname.com",
-      "image": "/images/gemini-safety.jpg"
+      "image": "gemini-safety.jpg"
+
     },
     "office_hours": {
       "title": "Office Hours",

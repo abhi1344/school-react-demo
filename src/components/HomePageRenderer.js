@@ -1,562 +1,302 @@
-import React, { useState, useEffect } from "react";
 
-const HomeRenderer = ({ json }) => {
-  const [width, setWidth] = useState(window.innerWidth);
+import React, { useState, useEffect } from 'react';
+
+const HomePageRenderer = ({ json }) => {
   const [heroIndex, setHeroIndex] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
-  // Track window width
+  // Handle responsive design via state
   useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-    // Hero carousel autoplay
+  // Hero carousel autoplay and preloading
+  useEffect(() => {
+    const slides = json.sections.hero.slides;
     const interval = setInterval(() => {
-      setHeroIndex((prev) => (prev + 1) % json.sections.hero.slides.length);
-    }, 5000);
+      setHeroIndex((prev) => (prev + 1) % slides.length);
+    }, 6000);
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      clearInterval(interval);
-    };
-  }, [json.sections.hero.slides.length]);
+    // Preload next image
+    const nextIndex = (heroIndex + 1) % slides.length;
+    const nextSlide = slides[nextIndex];
+    const img = new Image();
+    const isMobile = windowWidth < 768;
+    img.src = (isMobile ? nextSlide.background_image.responsive?.mobile : nextSlide.background_image.responsive?.desktop) || nextSlide.background_image.fallback;
 
-  const getLayout = (section) => {
-    if (width < 768) return section.mobile_layout;
-    if (width < 1440) return section.tablet_layout || section.desktop_layout;
-    return section.desktop_layout;
-  };
+    return () => clearInterval(interval);
+  }, [heroIndex, json.sections.hero.slides, windowWidth]);
 
-  // Render Hero
-  const renderHero = (hero) => {
+  const isMobile = windowWidth < 768;
+  const colors = json.design_system.colors;
+
+  // Renderer: Hero Section
+  const renderHero = () => {
+    const hero = json.sections.hero;
     const slide = hero.slides[heroIndex];
-    const layout = getLayout(hero);
-  
-    const isMobile = width < 768;
-    const heroBg = isMobile
-      ? slide.background_image.responsive.mobile
-      : slide.background_image.responsive.desktop;
-  
+    const layout = isMobile ? hero.mobile_layout : hero.desktop_layout;
+    const bgImage = (isMobile ? slide.background_image.responsive?.mobile : slide.background_image.responsive?.desktop) || slide.background_image.fallback;
+
+    const heroStyle = {
+      position: 'relative',
+      width: '100%',
+      height: layout?.height || '85vh',
+      minHeight: '500px',
+      display: 'flex',
+      alignItems: 'center',
+      backgroundColor: '#000',
+      overflow: 'hidden',
+    };
+
+    const backgroundStyle = {
+      position: 'absolute',
+      inset: 0,
+      backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 60%, transparent 100%), url(${bgImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      transition: 'background-image 1s ease-in-out',
+      zIndex: 0,
+    };
+
+    const contentWrapperStyle = {
+      position: 'relative',
+      zIndex: 10,
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: isMobile ? '0 24px' : '0 48px',
+      width: '100%',
+    };
+
+    const titleStyle = {
+      color: '#fff',
+      fontSize: isMobile ? '2.5rem' : '4.5rem',
+      fontWeight: '900',
+      lineHeight: '1.1',
+      marginBottom: '1.5rem',
+      maxWidth: '800px',
+      textShadow: '0 2px 10px rgba(0,0,0,0.3)',
+    };
+
+    const subtextStyle = {
+      color: 'rgba(255,255,255,0.9)',
+      fontSize: isMobile ? '1.1rem' : '1.35rem',
+      lineHeight: '1.6',
+      marginBottom: '2.5rem',
+      maxWidth: '600px',
+    };
+
+    const buttonStyle = {
+      padding: '16px 32px',
+      backgroundColor: colors.primary,
+      color: '#fff',
+      border: 'none',
+      borderRadius: '12px',
+      fontSize: '1.1rem',
+      fontWeight: '700',
+      cursor: 'pointer',
+      boxShadow: '0 10px 20px rgba(255,127,80,0.3)',
+      transition: 'all 0.2s ease',
+    };
+
     return (
-      <section
-        style={{
-          height: layout.height,
-          display: "flex",
-          alignItems: "center",
-          backgroundImage: `
-            linear-gradient(
-              to right,
-              rgba(0,0,0,0.55) 0%,
-              rgba(0,0,0,0.35) 45%,
-              rgba(0,0,0,0.15) 65%,
-              rgba(0,0,0,0) 100%
-            ),
-            url(${heroBg || slide.background_image.fallback})
-          `,
-          backgroundSize: width < 768 ? "contain" : "cover",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: width < 768 ? "center" : "center 60%",
-          backgroundColor: "#000",
-          position: "relative",
-          transition: "background-image 0.8s ease-in-out",
-        }}
-      >
-        {/* Content Wrapper */}
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "1200px",
-            margin: "0 auto",
-            padding: isMobile ? "2rem" : "0 4rem",
-          }}
-        >
-          <div
-            style={{
-              maxWidth: "620px",
-              color: "#fff",
-              animation: "fadeUp 0.9s ease both",
-            }}
-          >
-            <h1
-              style={{
-                fontSize: "clamp(2.4rem, 5vw, 3.8rem)",
-                fontWeight: 800,
-                lineHeight: 1.1,
-                marginBottom: "1.25rem",
-              }}
-            >
-              {slide.headline}
-            </h1>
-  
-            <p
-              style={{
-                fontSize: "1.15rem",
-                lineHeight: 1.7,
-                opacity: 0.95,
-                marginBottom: "2.25rem",
-              }}
-            >
-              {slide.subtext}
-            </p>
-  
-            {/* Hero CTA */}
-            <button
-              style={{
-                padding: "0.85rem 2.25rem",
-                background: "#FF7F50",
-                color: "#fff",
-                border: "none",
-                borderRadius: "10px",
-                fontSize: "1rem",
-                fontWeight: 600,
-                cursor: "pointer",
-                boxShadow: "0 10px 25px rgba(0,0,0,0.35)",
-                transition: "transform 0.2s ease",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.transform = "translateY(-2px)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.transform = "translateY(0)")
-              }
+      <section style={heroStyle}>
+        <div style={backgroundStyle} />
+        <div style={contentWrapperStyle}>
+          <div style={{ animation: 'fadeUp 0.8s ease forwards' }}>
+            <h1 style={titleStyle}>{slide.headline}</h1>
+            <p style={subtextStyle}>{slide.subtext}</p>
+            <button 
+              style={buttonStyle}
+              onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+              onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
             >
               Explore Our School
             </button>
           </div>
         </div>
-  
-        {/* Bottom transition fade */}
-        <div
-  style={{
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: width < 768 ? "120px" : "80px",
-    background:
-      "linear-gradient(to bottom, rgba(0,0,0,0) 0%, #F3F4F6 100%)",
-    pointerEvents: "none",
-  }}
-/>
-     </section>
+      </section>
     );
   };
-  
 
-  // Render About School
-  const renderAboutSchool = (about) => {
-    const isMobile = width < 768;
-  
+  // Renderer: About Section
+  const renderAbout = () => {
+    const about = json.sections.about_school;
+    const isMobileView = windowWidth < 1024;
+    
+    const sectionStyle = {
+      padding: isMobileView ? '60px 24px' : '100px 48px',
+      backgroundColor: '#f8fafc',
+    };
+
+    const containerStyle = {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      display: 'grid',
+      gridTemplateColumns: isMobileView ? '1fr' : '1fr 1fr',
+      gap: '60px',
+      alignItems: 'center',
+    };
+
+    const textSideStyle = {
+      order: isMobileView ? 2 : 1,
+    };
+
+    const imageSideStyle = {
+      order: isMobileView ? 1 : 2,
+      position: 'relative',
+    };
+
+    const imageStyle = {
+      width: '100%',
+      borderRadius: '30px',
+      boxShadow: '0 30px 60px rgba(0,0,0,0.12)',
+      border: '8px solid #fff',
+    };
+
     return (
-      <section
-        style={{
-          position: "relative",
-          background: "#F3F4F6",
-          padding: isMobile ? "3.5rem 1.5rem" : "4.5rem 3rem"
-        }}
-      >
-        {/* Top fade */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "90px",
-            background:
-              "linear-gradient(to bottom, rgba(243,244,246,0) 0%, #F3F4F6 100%)",
-            pointerEvents: "none",
-          }}
-        />
-  
-        <div
-          style={{
-            maxWidth: "1200px",
-            margin: "0 auto",
-            display: "flex",
-            flexDirection: isMobile ? "column" : "row",
-            gap: "4rem",
-            alignItems: "stretch", // 🔑 equal height columns
-          }}
-        >
-          {/* TEXT CARD */}
-          <div
-            style={{
-              flex: 1.1,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              background:
-                "linear-gradient(180deg, #FFFFFF 0%, #F9FAFB 100%)",
-                padding: isMobile ? "2.25rem" : "2.75rem",
-              borderRadius: "22px",
-              boxShadow:
-                "0 22px 50px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)",
-            }}
-          >
-            <span
-              style={{
-                display: "inline-block",
-                marginBottom: "0.75rem",
-                fontSize: "0.8rem",
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: json.design_system.colors.primary,
-              }}
-            >
-              Who We Are
+      <section style={sectionStyle}>
+        <div style={containerStyle}>
+          <div style={textSideStyle}>
+            <span style={{ color: colors.primary, fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '0.9rem', display: 'block', marginBottom: '12px' }}>
+              Academic Excellence
             </span>
-  
-            <h2
-              style={{
-                fontSize: "clamp(2.2rem, 4vw, 3rem)",
-                fontWeight: 700,
-                marginBottom: "1.25rem",
-                color: "#111827",
-              }}
-            >
-              About Our School
+            <h2 style={{ fontSize: isMobile ? '2.2rem' : '3.5rem', fontWeight: '800', color: '#0f172a', marginBottom: '24px', lineHeight: '1.2' }}>
+              Preparing Students for a <span style={{ color: colors.primary }}>Global Future</span>
             </h2>
-  
-            <p
-              style={{
-                fontSize: "1.12rem",
-                lineHeight: 1.75,
-                color: "#374151",
-                marginBottom: "2.25rem",
-              }}
-            >
-              Our school blends academic excellence with strong character building,
-              preparing students for a rapidly evolving world. We cultivate an
-              environment where curiosity, confidence, and critical thinking grow
-              naturally through innovative teaching and meaningful mentorship.
+            <p style={{ fontSize: '1.15rem', color: '#475569', lineHeight: '1.8', marginBottom: '32px' }}>
+              {about.content}
             </p>
-  
-            <ul
-              style={{
-                listStyle: "none",
-                padding: 0,
-                margin: "0 0 2rem 0",
-                display: "grid",
-                gap: ".75rem",
-              }}
-            >
-              {about.highlights.map((item, i) => (
-                <li
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.75rem",
-                    fontSize: "1.05rem",
-                    fontWeight: 500,
-                    color: "#1F2937",
-                    padding: "0.7rem 1rem",
-                    background: "#FFFFFF",
-                    borderRadius: "12px",
-                    boxShadow: "0 6px 14px rgba(0,0,0,0.06)",
-                  }}
-                >
-                  <span
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      background: json.design_system.colors.primary,
-                      borderRadius: "50%",
-                    }}
-                  />
-                  {item}
-                </li>
+            <div style={{ display: 'grid', gap: '16px' }}>
+              {about.highlights.map((h, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#fff', padding: '16px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+                  <div style={{ width: '10px', height: '10px', background: colors.primary, borderRadius: '50%' }} />
+                  <span style={{ fontWeight: '600', color: '#1e293b' }}>{h}</span>
+                </div>
               ))}
-            </ul>
-  
-            <button
-              style={{
-                alignSelf: "flex-start",
-                padding: "0.9rem 2.2rem",
-                background: json.design_system.colors.primary,
-                color: "#FFFFFF",
-                border: "none",
-                borderRadius: "12px",
-                fontSize: "1rem",
-                fontWeight: 600,
-                cursor: "pointer",
-                boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
-              }}
-            >
-              Discover Our Approach
-            </button>
+            </div>
           </div>
-  
-          {/* IMAGE */}
-          <div
-            style={{
-              flex: 0.9,
-              display: "flex",
-            }}
-          >
-            <img
-              src={about.supporting_visual.placeholder}
-              alt={about.supporting_visual.description}
-              style={{
-                width: "100%",
-                height: "100%", // 🔑 matches text height
-                objectFit: "cover",
-                borderRadius: "22px",
-                border: "6px solid #FFFFFF",
-                boxShadow: "0 24px 48px rgba(0,0,0,0.16)",
-              }}
-            />
+          <div style={imageSideStyle}>
+            <img src={about.supporting_visual.placeholder} alt={about.supporting_visual.description} style={imageStyle} />
           </div>
         </div>
       </section>
     );
   };
-  
-      // Render Highlights
 
+  // Renderer: Highlights (Grid)
+  const renderHighlights = () => {
+    const highlights = json.sections.highlights;
+    const cols = isMobile ? 1 : 4;
 
-// Render Highlights
-const renderHighlights = (highlights) => {
-  const layout = getLayout(highlights);
-  const columns = layout.columns ?? (width < 768 ? 1 : width < 1440 ? 2 : 3);
+    const sectionStyle = {
+      padding: '100px 24px',
+      backgroundColor: '#fff',
+    };
 
-  return (
-    <section
-    style={{
-      width: "100%",            // make sure section itself spans entire viewport
-      background: "#EEF2F9",    // light grey like About section
-      padding: width < 768 ? "3rem 1.5rem" : "5rem 0",  // horizontal padding 0
-      boxSizing: "border-box",
-    }}
-  >
-    {/* Header */}
-    <div
-  style={{
-    maxWidth: "1200px",
-    margin: "0 auto",
-    paddingBottom: "4.5rem", // ⬅️ THIS IS THE FIX
-    textAlign: "center",
-  }}
->
+    const gridStyle = {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      display: 'grid',
+      gridTemplateColumns: `repeat(${cols}, 1fr)`,
+      gap: '24px',
+    };
 
+    const cardStyle = {
+      padding: '32px',
+      borderRadius: '24px',
+      background: '#f1f5f9',
+      transition: 'all 0.3s ease',
+      textAlign: 'center',
+    };
 
-      <span
-        style={{
-          display: "inline-block",
-          fontSize: highlights.section_intro.text_style?.eyebrow_fontSize || "0.9rem",
-          fontWeight: 600,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          color: "#FF7F50",
-          marginBottom: "0.5rem"
-        }}
-      >
-        {highlights.section_intro.eyebrow}
-      </span>
-  
-      <h2
-        style={{
-          fontSize: highlights.section_intro.text_style?.headline_fontSize || "2.6rem",
-          fontWeight: 700,
-          margin: "0.5rem 0 1rem",
-          color: highlights.section_intro.text_style?.headline_color || "#111827",
-        }}
-      >
-        {highlights.section_intro.headline}
-      </h2>
-  
-      <p
-        style={{
-          maxWidth: "650px",
-          margin: "0 auto 2rem",
-          fontSize: highlights.section_intro.text_style?.description_fontSize || "1.1rem",
-          lineHeight: 1.75,
-          color: highlights.section_intro.text_style?.description_color || "#374151",
-        }}
-      >
-        {highlights.section_intro.description}
-      </p>
-      {highlights.section_intro.cta && (
-  <button
-    style={{
-      padding: "0.9rem 2.4rem",
-      borderRadius: "999px",
-      border: "none",
-      background: "linear-gradient(135deg, #FF7F50 0%, #FF9A73 100%)",
-      color: "#FFFFFF",
-      fontWeight: 600,
-      fontSize: "1rem",
-      cursor: "pointer",
-      boxShadow: "0 14px 30px rgba(255,127,80,0.35)",
-      transition: "all 0.25s ease",
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = "translateY(-2px)";
-      e.currentTarget.style.boxShadow =
-        "0 18px 38px rgba(255,127,80,0.45)";
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.style.boxShadow =
-        "0 14px 30px rgba(255,127,80,0.35)";
-    }}
-    onClick={() => (window.location.href = "/about")}
-  >
-    {highlights.section_intro.cta.label}
-  </button>
-)}
+    return (
+      <section style={sectionStyle}>
+        <div style={{ maxWidth: '800px', margin: '0 auto 60px', textAlign: 'center' }}>
+          <h2 style={{ fontSize: isMobile ? '2rem' : '3rem', fontWeight: '800', marginBottom: '16px' }}>{highlights.section_intro.headline}</h2>
+          <p style={{ color: '#64748b', fontSize: '1.1rem' }}>{highlights.section_intro.description}</p>
+        </div>
+        <div style={gridStyle}>
+          {highlights.items.map((item, i) => (
+            <div key={i} style={cardStyle}>
+              <div style={{ marginBottom: '24px', borderRadius: '16px', overflow: 'hidden', height: '180px' }}>
+                <img src={item.visual.placeholder} alt={item.visual.description} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '12px', color: '#0f172a' }}>{item.title}</h3>
+              <p style={{ fontSize: '0.95rem', color: '#64748b', lineHeight: '1.6' }}>{item.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  };
 
-    </div>
-  
-    {/* Cards */}
-    <div
-  style={{
-    maxWidth: "1200px",
-    margin: "0 auto",
-    display: "grid",
-    gridTemplateColumns: `repeat(${columns}, 1fr)`,
-    gap: "32px",
-  }}
->
+  // Renderer: CTA
+  const renderCTA = () => {
+    const cta = json.sections.cta;
+    const sectionStyle = {
+      padding: isMobile ? '60px 24px' : '100px 48px',
+      backgroundColor: '#f8fafc',
+    };
 
-      {highlights.items?.map((item) => (
-        <div
-          key={item.title}
-          style={{
-            background: "#FFFFFF",
-            borderRadius: "20px",
-            overflow: "hidden",
-            boxShadow: "0 22px 48px rgba(0,0,0,0.08)",
-            transition: "transform 0.3s ease",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-6px)")}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
-        >
-          <div
-            style={{
-              height: "4px",
-              background: json.design_system.colors.primary,
-            }}
-          />
-          <img
-            src={item.visual?.placeholder || ""}
-            alt={item.visual?.description || ""}
-            style={{
-              width: "100%",
-              height: "200px",
-              objectFit: "cover",
-            }}
-          />
-          <div style={{ padding: "1.8rem" }}>
-            <h3 style={{ fontSize: "1.35rem", marginBottom: "0.7rem", color: "#111827" }}>
-              {item.title}
-            </h3>
-            <p style={{ fontSize: "1rem", lineHeight: 1.65, color: "#374151" }}>
-              {item.description}
-            </p>
+    const bannerStyle = {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      borderRadius: '40px',
+      padding: isMobile ? '60px 30px' : '100px',
+      backgroundImage: `linear-gradient(135deg, rgba(15,23,42,0.9), rgba(15,23,42,0.7)), url(${cta.background_image.placeholder})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      color: '#fff',
+      textAlign: 'center',
+      boxShadow: '0 40px 80px rgba(0,0,0,0.2)',
+    };
+
+    return (
+      <section style={sectionStyle}>
+        <div style={bannerStyle}>
+          <h2 style={{ fontSize: isMobile ? '2.5rem' : '4rem', fontWeight: '900', marginBottom: '24px' }}>{cta.headline}</h2>
+          <p style={{ fontSize: '1.25rem', marginBottom: '48px', maxWidth: '700px', margin: '0 auto 48px', opacity: '0.9' }}>{cta.subtext}</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'center' }}>
+            {cta.buttons.map((btn, i) => (
+              <button 
+                key={i}
+                style={{
+                  padding: '16px 40px',
+                  borderRadius: '16px',
+                  fontWeight: '700',
+                  fontSize: '1.1rem',
+                  cursor: 'pointer',
+                  border: 'none',
+                  backgroundColor: btn.type === 'primary' ? colors.primary : 'rgba(255,255,255,0.1)',
+                  color: '#fff',
+                  backdropFilter: btn.type !== 'primary' ? 'blur(10px)' : 'none',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {btn.label}
+              </button>
+            ))}
           </div>
         </div>
-      ))}
+      </section>
+    );
+  };
+
+  return (
+    <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      {renderHero()}
+      {renderAbout()}
+      {renderHighlights()}
+      {renderCTA()}
+      <footer style={{ padding: '60px 24px', textAlign: 'center', borderTop: '1px solid #e2e8f0', backgroundColor: '#fff' }}>
+        <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>
+          © 2026 Modern School Excellence Group. All rights reserved.
+        </p>
+      </footer>
     </div>
-  </section>
-  
   );
 };
 
-// Render CTA
-const renderCTA = (cta) => {
-  const layout = getLayout(cta) || {};
-  const padding = layout.padding || (width < 768 ? "3rem 1.5rem" : "4rem 0");
-
-  return (
-    <section
-      style={{
-        maxWidth: "1200px",
-        margin: "1rem auto",
-        padding: padding,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        textAlign: "center",
-        background: `
-          linear-gradient(
-            135deg,
-            rgba(255,127,80,0.10) 0%,
-            rgba(255,255,255,0.85) 45%,
-            rgba(255,255,255,0.95) 100%
-          ),
-          url(${cta.background_image?.placeholder})
-        `,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        borderRadius: "28px",
-        boxShadow: "0 30px 60px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.6)",
-        animation: "fadeInUp 1s ease forwards",
-      }}
-    >
-      <h2
-        style={{
-          fontSize: "clamp(2.6rem, 5vw, 3.4rem)",
-          fontWeight: 800,
-          color: "#111827",
-          marginBottom: "1rem",
-          lineHeight: 1.15,
-        }}
-      >
-        {cta.headline}
-      </h2>
-
-      <p
-        style={{
-          maxWidth: "720px",
-          fontSize: "1.2rem",
-          lineHeight: 1.75,
-          color: "#374151",
-          marginBottom: "2.5rem",
-        }}
-      >
-        {cta.subtext}
-      </p>
-
-      <div style={{ marginTop: "1.5rem", display: "flex", gap: "1rem" }}>
-        {cta.buttons?.map((btn) => (
-          <button
-            key={btn.label}
-            style={{
-              padding: "0.75rem 1.5rem",
-              backgroundColor: btn.type === "primary" ? "#FF7F50" : "#fff",
-              color: btn.type === "primary" ? "#fff" : "#FF7F50",
-              border: btn.type === "primary" ? "none" : "2px solid #FF7F50",
-              borderRadius: "8px",
-              cursor: "pointer",
-              transition: "all 0.3s",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-            onClick={() => {
-              if (btn.action === "navigate_to_admissions")
-                window.location.href = "/admissions";
-              else if (btn.action === "navigate_to_contact")
-                window.location.href = "/contact";
-            }}
-          >
-            {btn.label}
-          </button>
-        ))}
-      </div>
-    </section>
-  );
-};
-
-  return (
-    <main className="page-home">
-      {renderHero(json.sections.hero)}
-      {renderAboutSchool(json.sections.about_school)}
-      {renderHighlights(json.sections.highlights)}
-      {renderCTA(json.sections.cta)}
-    </main>
-  );
-};
-
-export default HomeRenderer;
+export default HomePageRenderer;
