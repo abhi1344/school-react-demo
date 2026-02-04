@@ -22,8 +22,15 @@ const AdminDashboard = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   
+  // UI State for responsiveness
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
   // localData acts as our Reactive Cache for the locked renderer
   const [localData, setLocalData] = useState({});
+  
+  // Level-5 State Management
+  const [liveStats, setLiveStats] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const initPortal = async () => {
@@ -56,21 +63,27 @@ const AdminDashboard = () => {
           const uiMap = adapterRules.adapter_logic.ui_section_mapping;
           const tableNames = Object.keys(uiMap);
 
-          // Fetch all relevant table data in parallel
-          const fetchResults = await Promise.all(
-            tableNames.map(tableName => supabase.from(tableName).select("*"))
-          );
+          // Fetch all relevant table data and exact counts in parallel
+          const [fetchResults, countResults] = await Promise.all([
+            Promise.all(tableNames.map(tableName => supabase.from(tableName).select("*"))),
+            Promise.all(tableNames.map(tableName => supabase.from(tableName).select('*', { count: 'exact', head: true })))
+          ]);
 
+          // Map Table Data
           fetchResults.forEach((res, index) => {
             if (!res.error && res.data && res.data.length > 0) {
               const tableName = tableNames[index];
               const uiSectionId = uiMap[tableName];
-              // Hydrate localData using the resolved UI Section ID
               initialData[uiSectionId] = res.data;
-            } else if (res.error) {
-              console.warn(`Could not hydrate table ${tableNames[index]}:`, res.error.message);
             }
           });
+
+          // Map Counts for Live Stats (Level-5A)
+          const counts = {};
+          tableNames.forEach((name, i) => {
+            counts[name] = countResults[i].count || 0;
+          });
+          setLiveStats(counts);
         }
 
         setLocalData(initialData);
@@ -88,6 +101,43 @@ const AdminDashboard = () => {
 
     initPortal();
   }, []);
+
+  // Level-5C: CSV Export Utility
+  const handleExportCSV = () => {
+    const activePage = config.pages[activeTab];
+    const tableSection = activePage.sections.find(s => s.type === "table");
+    
+    if (!tableSection) {
+      alert("No data table available for export on this page.");
+      return;
+    }
+
+    const data = localData[tableSection.id] || tableSection.data || [];
+    if (data.length === 0) {
+      alert("No records found to export.");
+      return;
+    }
+
+    // Follow column order defined in adminDashboard.json
+    const headers = tableSection.columns.map(col => col.header).join(",");
+    const rows = data.map(row => 
+      tableSection.columns.map(col => {
+        const val = row[col.key] || "";
+        return `"${String(val).replace(/"/g, '""')}"`;
+      }).join(",")
+    ).join("\n");
+
+    const csvContent = `${headers}\n${rows}`;
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${tableSection.id}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // L4: Write-Flow via Supabase
   const handleFormSubmit = async (e, sectionId) => {
@@ -110,7 +160,6 @@ const AdminDashboard = () => {
     try {
       // 2. REMOTE PERSISTENCE: Write to Supabase
       if (rules.system_contract.persistence === "supabase_remote_state") {
-        console.log(`Writing to Supabase table: ${tableId}`, record);
         const { error: dbError } = await supabase
           .from(tableId)
           .insert([record]);
@@ -124,6 +173,11 @@ const AdminDashboard = () => {
         ...prev,
         [targetStateKey]: [...(prev[targetStateKey] || []), record]
       }));
+
+      // Update Live Stats counts locally for reactivity
+      if (liveStats && liveStats[tableId] !== undefined) {
+        setLiveStats(prev => ({ ...prev, [tableId]: (prev[tableId] || 0) + 1 }));
+      }
 
       e.target.reset();
       console.log("Persistence successful.");
@@ -241,7 +295,13 @@ const AdminDashboard = () => {
 
   return (
     <div className="dashboard">
-      <aside className="sidebar">
+      {/* Sidebar Overlay for Mobile */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`} 
+        onClick={() => setIsSidebarOpen(false)} 
+      />
+
+      <aside className={`sidebar ${isSidebarOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-logo">
           <Icon name="GraduationCap" className="text-primary" />
           <span>{config.portalTitle}</span>
@@ -252,7 +312,11 @@ const AdminDashboard = () => {
             <button
               key={item.id}
               className={`nav-item ${activeTab === item.id ? "active" : ""}`}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                setActiveTab(item.id);
+                setSearchTerm(""); // Reset search on navigation
+                setIsSidebarOpen(false); // Close sidebar on mobile after selection
+              }}
             >
               <Icon name={item.icon} className="w-4 h-4" />
               <span>{item.label}</span>
@@ -263,24 +327,72 @@ const AdminDashboard = () => {
 
       <main className="main-content">
         <header className="header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>{activePage.title}</h2>
+          <div className="header-left">
+            <button 
+              className="mobile-toggle" 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              aria-label="Toggle Menu"
+            >
+              <Icon name={isSidebarOpen ? "X" : "Menu"} />
+            </button>
+            <h2 className="header-title">{activePage.title}</h2>
           </div>
-          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+          <div className="header-controls">
             <div className="search-box">
               <Icon name="Search" className="text-muted" style={{ width: '16px', height: '16px' }} />
-              <input type="text" placeholder="Search..." />
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <button className="button-secondary">Export</button>
-            <button className="button-primary">Generate Report</button>
+            <div className="action-buttons">
+              <button className="button-secondary" onClick={handleExportCSV}>Export CSV</button>
+              <button
+                className="button-primary"
+                onClick={() => {
+                  alert("Report generation coming soon (PDF / Analytics).");
+                }}
+              >
+                Report
+              </button>
+            </div>
           </div>
         </header>
 
         <div className="content-body">
           {activePage.sections.map((section) => {
-            const displaySection = section.type === "table" 
-              ? { ...section, data: localData[section.id] || section.data } 
-              : section;
+            // Level-5 Prep Data: Intercept section data before passing to Locked Renderer
+            let displaySection = { ...section };
+
+            // Level-5A: Inject Live Stats counts into Overview page
+            if (section.type === "stats" && section.id === "quickStats" && liveStats) {
+              displaySection.data = section.data.map(stat => {
+                let liveValue = stat.value;
+                if (stat.label === "Total Students") liveValue = liveStats.students?.toLocaleString();
+                if (stat.label === "Active Teachers") liveValue = liveStats.teachers?.toLocaleString();
+                if (stat.label === "Open Classes") liveValue = liveStats.classes?.toLocaleString();
+                if (stat.label === "New Notices") liveValue = liveStats.notices?.toLocaleString();
+                return { ...stat, value: liveValue || stat.value };
+              });
+            }
+
+            // Level-5B: Table Search (Client-Side) - Scan all whitelisted column keys
+            if (section.type === "table") {
+              const rawData = localData[section.id] || section.data || [];
+              if (searchTerm.trim()) {
+                const term = searchTerm.toLowerCase();
+                displaySection.data = rawData.filter(row => 
+                  section.columns.some(col => 
+                    String(row[col.key] || "").toLowerCase().includes(term)
+                  )
+                );
+              } else {
+                displaySection.data = rawData;
+              }
+            }
+
             return renderSection(displaySection);
           })}
         </div>

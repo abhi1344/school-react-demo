@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { processFormData } from "../dataAdapter/index.js";
 import { supabase } from "../supabaseClient.js";
@@ -25,36 +24,117 @@ const AdminDashboard = () => {
   
   // localData acts as our Reactive Cache for the locked renderer
   const [localData, setLocalData] = useState({});
+  
+  // Level-5 State Management
+  const [liveStats, setLiveStats] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    Promise.all([
-      fetch("/json/adminDashboard.json").then(res => res.json()),
-      fetch("/json/adapter.rules.json").then(res => res.json())
-    ])
-    .then(([data, adapterRules]) => {
-      setConfig(data);
-      setRules(adapterRules);
-      
-      const initialData = {};
-      Object.values(data.pages).forEach(page => {
-        page.sections.forEach(section => {
-          if (section.type === "table") {
-            initialData[section.id] = section.data || [];
-          }
+    const initPortal = async () => {
+      try {
+        const [configRes, rulesRes] = await Promise.all([
+          fetch("/json/adminDashboard.json"),
+          fetch("/json/adapter.rules.json")
+        ]);
+        
+        if (!configRes.ok || !rulesRes.ok) throw new Error("Failed to load configuration files.");
+        
+        const data = await configRes.json();
+        const adapterRules = await rulesRes.json();
+        
+        setConfig(data);
+        setRules(adapterRules);
+        
+        // 1. Initial configuration: Seed from JSON defaults
+        const initialData = {};
+        Object.values(data.pages).forEach(page => {
+          page.sections.forEach(section => {
+            if (section.type === "table") {
+              initialData[section.id] = section.data || [];
+            }
+          });
         });
-      });
-      setLocalData(initialData);
 
-      if (data.navigation && data.navigation.length > 0) {
-        setActiveTab(data.navigation[0].id);
+        // 2. READ Hydration: Fetch live data from Supabase to replace/augment static data
+        if (adapterRules.system_contract.persistence === "supabase_remote_state") {
+          const uiMap = adapterRules.adapter_logic.ui_section_mapping;
+          const tableNames = Object.keys(uiMap);
+
+          // Fetch all relevant table data and exact counts in parallel
+          const [fetchResults, countResults] = await Promise.all([
+            Promise.all(tableNames.map(tableName => supabase.from(tableName).select("*"))),
+            Promise.all(tableNames.map(tableName => supabase.from(tableName).select('*', { count: 'exact', head: true })))
+          ]);
+
+          // Map Table Data
+          fetchResults.forEach((res, index) => {
+            if (!res.error && res.data && res.data.length > 0) {
+              const tableName = tableNames[index];
+              const uiSectionId = uiMap[tableName];
+              initialData[uiSectionId] = res.data;
+            }
+          });
+
+          // Map Counts for Live Stats (Level-5A)
+          const counts = {};
+          tableNames.forEach((name, i) => {
+            counts[name] = countResults[i].count || 0;
+          });
+          setLiveStats(counts);
+        }
+
+        setLocalData(initialData);
+
+        if (data.navigation && data.navigation.length > 0) {
+          setActiveTab(data.navigation[0].id);
+        }
+        setLoading(false);
+      } catch (err) {
+        console.error("Dashboard Initialization Error:", err);
+        setError(err.message);
+        setLoading(false);
       }
-      setLoading(false);
-    })
-    .catch((err) => {
-      setError(err.message);
-      setLoading(false);
-    });
+    };
+
+    initPortal();
   }, []);
+
+  // Level-5C: CSV Export Utility
+  const handleExportCSV = () => {
+    const activePage = config.pages[activeTab];
+    const tableSection = activePage.sections.find(s => s.type === "table");
+    
+    if (!tableSection) {
+      alert("No data table available for export on this page.");
+      return;
+    }
+
+    const data = localData[tableSection.id] || tableSection.data || [];
+    if (data.length === 0) {
+      alert("No records found to export.");
+      return;
+    }
+
+    // Follow column order defined in adminDashboard.json
+    const headers = tableSection.columns.map(col => col.header).join(",");
+    const rows = data.map(row => 
+      tableSection.columns.map(col => {
+        const val = row[col.key] || "";
+        return `"${String(val).replace(/"/g, '""')}"`;
+      }).join(",")
+    ).join("\n");
+
+    const csvContent = `${headers}\n${rows}`;
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${tableSection.id}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // L4: Write-Flow via Supabase
   const handleFormSubmit = async (e, sectionId) => {
@@ -77,7 +157,6 @@ const AdminDashboard = () => {
     try {
       // 2. REMOTE PERSISTENCE: Write to Supabase
       if (rules.system_contract.persistence === "supabase_remote_state") {
-        console.log(`Writing to Supabase table: ${tableId}`, record);
         const { error: dbError } = await supabase
           .from(tableId)
           .insert([record]);
@@ -86,12 +165,16 @@ const AdminDashboard = () => {
       }
 
       // 3. UI SYNC: Update Local Cache for the locked renderer
-      // We map the DB table back to the UI Section ID (e.g., 'students' -> 'studentTable')
       const targetStateKey = uiSectionId || tableId;
       setLocalData(prev => ({
         ...prev,
         [targetStateKey]: [...(prev[targetStateKey] || []), record]
       }));
+
+      // Update Live Stats counts locally for reactivity
+      if (liveStats && liveStats[tableId] !== undefined) {
+        setLiveStats(prev => ({ ...prev, [tableId]: (prev[tableId] || 0) + 1 }));
+      }
 
       e.target.reset();
       console.log("Persistence successful.");
@@ -220,7 +303,10 @@ const AdminDashboard = () => {
             <button
               key={item.id}
               className={`nav-item ${activeTab === item.id ? "active" : ""}`}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                setActiveTab(item.id);
+                setSearchTerm(""); // Reset search on navigation
+              }}
             >
               <Icon name={item.icon} className="w-4 h-4" />
               <span>{item.label}</span>
@@ -237,18 +323,51 @@ const AdminDashboard = () => {
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
             <div className="search-box">
               <Icon name="Search" className="text-muted" style={{ width: '16px', height: '16px' }} />
-              <input type="text" placeholder="Search..." />
+              <input 
+                type="text" 
+                placeholder="Search visible records..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <button className="button-secondary">Export</button>
-            <button className="button-primary">Generate Report</button>
+            <button className="button-secondary" onClick={handleExportCSV}>Export CSV</button>
+
+
           </div>
         </header>
 
         <div className="content-body">
           {activePage.sections.map((section) => {
-            const displaySection = section.type === "table" 
-              ? { ...section, data: localData[section.id] || section.data } 
-              : section;
+            // Level-5 Prep Data: Intercept section data before passing to Locked Renderer
+            let displaySection = { ...section };
+
+            // Level-5A: Inject Live Stats counts into Overview page
+            if (section.type === "stats" && section.id === "quickStats" && liveStats) {
+              displaySection.data = section.data.map(stat => {
+                let liveValue = stat.value;
+                if (stat.label === "Total Students") liveValue = liveStats.students?.toLocaleString();
+                if (stat.label === "Active Teachers") liveValue = liveStats.teachers?.toLocaleString();
+                if (stat.label === "Open Classes") liveValue = liveStats.classes?.toLocaleString();
+                if (stat.label === "New Notices") liveValue = liveStats.notices?.toLocaleString();
+                return { ...stat, value: liveValue || stat.value };
+              });
+            }
+
+            // Level-5B: Table Search (Client-Side) - Scan all whitelisted column keys
+            if (section.type === "table") {
+              const rawData = localData[section.id] || section.data || [];
+              if (searchTerm.trim()) {
+                const term = searchTerm.toLowerCase();
+                displaySection.data = rawData.filter(row => 
+                  section.columns.some(col => 
+                    String(row[col.key] || "").toLowerCase().includes(term)
+                  )
+                );
+              } else {
+                displaySection.data = rawData;
+              }
+            }
+
             return renderSection(displaySection);
           })}
         </div>

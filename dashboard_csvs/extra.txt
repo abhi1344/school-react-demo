@@ -1,0 +1,45 @@
+           <button
+  className="button-primary"
+  onClick={() => {
+    alert("Report generation coming soon (PDF / Analytics).");
+  }}
+>
+  Generate Report
+</button>
+
+
+@media (max-width: 1024px) {
+  .sidebar {
+    background-color: #0f172a; /* slate-900 */
+    border-right: none;
+  }
+
+  .sidebar-logo {
+    color: #f8fafc;
+  }
+
+  .nav-label {
+    color: #94a3b8;
+  }
+
+  .nav-item {
+    color: #e5e7eb;
+  }
+
+  .nav-item:hover {
+    background-color: #1e293b;
+    color: #ffffff;
+  }
+
+  .nav-item.active {
+    background-color: var(--primary);
+    color: #ffffff;
+    box-shadow: none;
+  }
+
+  /* Lucide / SVG icons */
+  .sidebar svg {
+    stroke: #e5e7eb;
+  }
+}
+
