@@ -1,3 +1,4 @@
+
 /**
  * Pure Adapter Module - LEVEL 4
  * Responsibility: Map Form Inputs -> Normalized DB Records
@@ -5,7 +6,13 @@
  * Drops all unknown UI keys to prevent Supabase "column not found" errors.
  */
 
- export const processFormData = (formIdOrSectionId, formValues, rules) => {
+ //export const processFormData = (formIdOrSectionId, formValues, rules) => {
+  export const processFormData = (
+    formIdOrSectionId,
+    formValues,
+    rules,
+    options = {}
+  ) => {
   const { adapter_logic, system_contract } = rules;
 
   // --- 1. Context Resolution ---
@@ -74,6 +81,11 @@
       record[publishDbKey] = new Date().toISOString().split("T")[0];
     }
   }
+  // --- 4. Update Mode Handling ---
+if (options.mode === "update" && options.primaryKey) {
+  // Never emit primary key in update payload
+  delete record[options.primaryKey];
+}
 
   // Verification: The emitted record keys must strictly match DB expectations
   // Any UI keys not found in normalizationMap[formId] have been successfully pruned.

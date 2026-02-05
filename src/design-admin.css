@@ -486,43 +486,53 @@ body {
     width: 100%;
   }
 }
-/*------gpt----*/
-/* ============================= */
-/* Mobile Sidebar Contrast Fix */
-/* ============================= */
-
-@media (max-width: 1024px) {
-  .sidebar {
-    background-color: #0f172a; /* slate-900 */
-    border-right: none;
-  }
-
-  .sidebar-logo {
-    color: #f8fafc;
-  }
-
-  .nav-label {
-    color: #94a3b8;
-  }
-
-  .nav-item {
-    color: #e5e7eb;
-  }
-
-  .nav-item:hover {
-    background-color: #1e293b;
-    color: #ffffff;
-  }
-
-  .nav-item.active {
-    background-color: var(--primary);
-    color: #ffffff;
-    box-shadow: none;
-  }
-
-  /* Lucide / SVG icons */
-  .sidebar svg {
-    stroke: #e5e7eb;
-  }
+/*----BTN ADD DELETE IN AdminDashboard.js*/
+/* Common icon button base */
+/* Base icon button */
+/* Common icon button base */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  gap: 6px; /* future-proof if text is added */
 }
 
+/* Edit button style */
+.btn-icon.edit {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-icon.edit svg,
+.btn-icon.edit i {
+  width: 14px;
+  height: 14px;
+  color: #2563eb;
+}
+
+/* Delete button style */
+.btn-icon.delete {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+}
+
+.btn-icon.delete svg,
+.btn-icon.delete i {
+  width: 14px;
+  height: 14px;
+  color: #dc2626;
+}
+
+/* Hover states (recommended) */
+.btn-icon.edit:hover {
+  background: #e2e8f0;
+}
+
+.btn-icon.delete:hover {
+  background: #fecaca;
+}
