@@ -28,10 +28,14 @@
   }
 
   const tableId = adapter_logic.target_table_resolution[formId];
-  const uiSectionId = adapter_logic.ui_section_mapping[tableId];
+  const uiSectionId =
+  adapter_logic.ui_section_mapping[tableId] ||
+  (tableId === "assignments" ? "assignmentTable" : null);
+
   const normalizationMap = adapter_logic.field_name_normalization[formId] || {};
   const defaults = adapter_logic.default_value_injection;
-
+  
+    
   // --- 2. Strict Whitelist Normalization ---
   // We initialize an empty record and ONLY populate it using the mapping rules.
   // This ensures UI-only keys (e.g., 'studentCode') never reach the DB unless explicitly mapped.
@@ -43,6 +47,11 @@
       record[dbColumn] = formValues[uiKey];
     }
   });
+  // 🔒 Never allow assignmentCode change during edit
+if (tableId === "assignments" && options.mode === "update") {
+  delete record.assignmentCode;
+}
+
 
   // Helper to resolve a UI semantic field to a DB column based on the strict whitelist
   const getDbColumn = (uiKey) => normalizationMap[uiKey];
@@ -82,10 +91,34 @@
     }
   }
   // --- 4. Update Mode Handling ---
-if (options.mode === "update" && options.primaryKey) {
-  // Never emit primary key in update payload
-  delete record[options.primaryKey];
+  if (options.mode === "update" && options.primaryKey && options.existingRow) {
+    Object.keys(normalizationMap).forEach((uiKey) => {
+      const dbColumn = normalizationMap[uiKey];
+      if (formValues[uiKey] !== undefined && formValues[uiKey] !== null) {
+        record[dbColumn] = formValues[uiKey]; // overwrite with new value
+      } else {
+        // keep existing value from DB
+        record[dbColumn] = options.existingRow[dbColumn];
+      }
+    });
+    delete record[options.primaryKey]; // still delete PK
+  }
+  // ------------------ Assignment Default ------------------
+// Only generate code if creating a new assignment
+// Only generate code when creating
+if (
+  tableId === "assignments" &&
+  options.mode !== "update" &&
+  !record.assignmentCode
+) {
+  record.assignmentCode = `ASN-${Math.floor(Math.random() * 100000)}`;
 }
+
+
+// Remove null/empty fields so DB defaults are applied
+Object.keys(record).forEach(key => {
+  if (record[key] === null || record[key] === "") delete record[key];
+});
 
   // Verification: The emitted record keys must strictly match DB expectations
   // Any UI keys not found in normalizationMap[formId] have been successfully pruned.

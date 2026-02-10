@@ -1,0 +1,147 @@
+{
+  "portalTitle": "EduTeacher v1.0",
+
+  "context": {
+    "role": "teacher",
+    "editableScope": ["self", "assigned"]
+  },
+
+  "navigation": [
+    { "id": "overview", "label": "Dashboard Overview", "icon": "LayoutDashboard" },
+    { "id": "profile", "label": "My Profile", "icon": "User" },
+    { "id": "classes", "label": "My Classes", "icon": "BookOpen" },
+    { "id": "students", "label": "My Students", "icon": "Users" },
+    { "id": "assignments", "label": "Assignments", "icon": "ClipboardList" },
+    { "id": "notices", "label": "School Notices", "icon": "Bell" }
+  ],
+
+  "pages": {
+    "overview": {
+      "title": "Welcome, Faculty Member",
+      "sections": [
+        {
+          "id": "quickStats",
+          "type": "stats",
+          "title": "Classroom Metrics",
+          "data": [
+            { "label": "Total Students", "value": "120", "trend": "+4" },
+            { "label": "Open Classes", "value": "5", "trend": "Active" },
+            { "label": "Graded Assignments", "value": "24", "trend": "92%" },
+            { "label": "New Notices", "value": "3", "trend": "Today" }
+          ]
+        }
+      ]
+    },
+
+    "profile": {
+      "title": "Faculty Profile",
+      "sections": [
+        {
+          "id": "teacherProfileForm",
+          "type": "form",
+          "mode": "self-edit",
+          "title": "Update Personal Information",
+          "fields": [
+            { "name": "staffCode", "label": "Staff ID", "type": "text", "required": true, "locked": true },
+            { "name": "name", "label": "Full Name", "type": "text", "required": true },
+            { "name": "email", "label": "Work Email", "type": "email", "required": true },
+            { "name": "department", "label": "Department", "type": "select", "options": ["Science", "Math", "Arts", "Humanities"], "required": true },
+            { "name": "bio", "label": "Biography", "type": "textarea" }
+          ]
+        }
+      ]
+    },
+
+    "classes": {
+      "title": "Teaching Schedule",
+      "sections": [
+        {
+          "id": "classTable",
+          "type": "table",
+          "title": "Assigned Course Sections",
+          "ownership": "assigned",
+          "columns": [
+            { "key": "code", "header": "Academic Code" },
+            { "key": "subject", "header": "Subject Title" },
+            { "key": "room", "header": "Room" },
+            { "key": "capacity", "header": "Enrollment" }
+          ]
+        }
+      ]
+    },
+
+    "students": {
+      "title": "Student Rosters",
+      "sections": [
+        {
+          "id": "studentTable",
+          "type": "table",
+          "ownership": "assigned",
+          "title": "Assigned Students",
+          "columns": [
+            { "key": "studentCode", "header": "Student ID" },
+            { "key": "name", "header": "Full Name" },
+            { "key": "grade", "header": "Grade" },
+            { "key": "status", "header": "Status" }
+          ]
+        }
+      ]
+    },
+
+    "assignments": {
+      "title": "Assignment Management",
+      "sections": [
+        {
+          "id": "assignmentTable",
+          "type": "table",
+          "title": "Published Tasks",
+          "source": ["admin", "teacher"],
+          "columns": [
+            { "key": "assignmentCode", "header": "Assignment ID" },
+            { "key": "title", "header": "Assignment Title" },
+            { "key": "date", "header": "Due Date" },
+            { "key": "target", "header": "Class" },
+            { "key": "content", "header": "instruction" }
+          ]
+        },
+        {
+          "id": "addAssignmentForm",
+          "type": "form",
+          "mode": "create",
+          "title": "Post New Assignment",
+          "fields": [
+            { "name": "assignmentCode", "label": "Assignment ID", "type": "text", "readonly": true, "defaultValue": "ASN-0001" },
+            { "name": "title", "label": "Assignment Title", "type": "text", "required": true },
+            { "name": "date", "label": "Due date", "type": "date", "required": true },
+            { "name": "target", "label": "Class", "type": "select", "options": ["SCI-101", "SCI-202", "MATH-202"], "required": true },
+            { "name": "content", "label": "instruction", "type": "textarea", "required": true }
+          ],
+
+          "meta": {
+            "createdByRole": "teacher",
+            "editableByTeacher": true
+          }
+        }
+      ]
+    },
+
+    "notices": {
+      "title": "Bulletins & Alerts",
+      "sections": [
+        {
+          "id": "noticeTable",
+          "type": "table",
+          "title": "School Announcements",
+          "source": ["admin", "teacher"],
+          "columns": [
+            { "key": "noticeCode", "header": "Notice ID" },
+            { "key": "date", "header": "Published" },
+            { "key": "title", "header": "Bulletin Title" },
+            { "key": "content", "header": "Summary" },
+            { "key": "createdByRole", "header": "Origin" }
+          ]
+        }
+      ]
+    }
+  }
+}

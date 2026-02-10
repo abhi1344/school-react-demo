@@ -6,6 +6,8 @@ import ContactPage from "./ContactPage";
 import Navbar from "./Navbar";
 import PanelsPagee from "./pages/PanelsPagee"; 
 import AdminDashboard from "./pages/AdminDashboard";
+import TeacherDashboard from "./pages/TeacherDashboard";
+console.log("MAIN APP LOADED");
 function App() {
   const [page, setPage] = useState("home");
 
@@ -19,6 +21,7 @@ function App() {
       {page === "contact" && <ContactPage />}
       {page === "panels" && <PanelsPagee setPage={setPage} />}
       {page === "admin" && <AdminDashboard />}
+      {page === "teacher" && <TeacherDashboard />}
     </div>
   );
 }

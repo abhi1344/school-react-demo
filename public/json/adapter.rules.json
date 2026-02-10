@@ -15,13 +15,15 @@
       "addStudentForm": "students",
       "addTeacherForm": "teachers",
       "addClassForm": "classes",
-      "addNoticeForm": "notices"
+      "addNoticeForm": "notices",
+      "addAssignmentForm": "assignments"
     },
     "ui_section_mapping": {
       "students": "studentTable",
       "teachers": "teacherTable",
       "classes": "classTable",
-      "notices": "noticeTable"
+      "notices": "noticeTable",
+      "assignments": "assignmentTable"
     },
     "field_name_normalization": {
       "addStudentForm": {
@@ -53,13 +55,21 @@
         "title": "title",
         "target": "target",
         "content": "content"
-      }     
+      },  
+      "addAssignmentForm": {
+        "assignmentCode": "assignmentCode",
+        "title": "title",
+        "date": "date",
+        "target": "target",
+        "content": "content"
+      }    
     },
     "default_value_injection": {
       "status": "Active",
       "id": "NEW-{random}",
       "date": "current_iso_date"
     }
+   
   },
   "issue_classification": {
     "safe_semantic_mismatches": [

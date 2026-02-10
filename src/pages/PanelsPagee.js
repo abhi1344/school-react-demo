@@ -128,17 +128,30 @@ function PanelsPagee({ setPage }) {
         </button>
 
         {/* Teacher Card */}
-        <button 
-          style={baseCardStyle} 
-          className="panel-card"
-          disabled
-        >
-          <span style={activeBadgeStyle}>Full Acces</span>
-          <h2 style={cardTitleStyle}>
-            <span style={{ fontSize: '1.5em' }}>🎓</span> Teacher Panel
-          </h2>
-          <p style={cardDescStyle}>Module for grading, lesson planning, and student performance tracking. Currently under development.</p>
-        </button>
+    {/* Teacher Card */}
+<button
+  style={baseCardStyle}
+  className="panel-card"
+  onClick={() => setPage("teacher")}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.transform = 'translateY(-8px)';
+    e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.08)';
+    e.currentTarget.style.borderColor = '#4f46e5';
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.transform = 'translateY(0)';
+    e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.04)';
+    e.currentTarget.style.borderColor = '#f1f5f9';
+  }}
+>
+  <span style={activeBadgeStyle}>Full Access</span>
+  <h2 style={cardTitleStyle}>
+    <span style={{ fontSize: '1.5em' }}>🎓</span> Teacher Panel
+  </h2>
+  <p style={cardDescStyle}>
+    Access to assigned classes, student lists, notices, and academic tools.
+  </p>
+</button>
 
         {/* Student Card */}
         <button 
